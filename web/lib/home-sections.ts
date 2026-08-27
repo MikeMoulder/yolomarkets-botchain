@@ -21,7 +21,7 @@ export type HomeSections = {
 /** Curated house category. Admin-authored markets tagged with this are
  *  surfaced in their own rail directly under Biggest Movers, ahead of Fast and
  *  every organic category — it is the editorial slot, not an organic bucket. */
-export const ARC_SPECIAL_CATEGORY = "Arc Special";
+export const ARC_SPECIAL_CATEGORY = "BOT Special";
 
 /** Category display order for the grouped browse. Anything unmapped is
  *  appended alphabetically after these, so new admin categories still show. */
@@ -61,7 +61,7 @@ function toCard(
     return toNativeCardModel(m, imageFor(m, overlay, adminImages));
 }
 
-/** Turn the active native (Arc-tradeable) markets into a structured home page:
+/** Turn the active native (BOT Chain-tradeable) markets into a structured home page:
  *  a featured hero set, an "ending soon" rail, and category groups (Fast first,
  *  then by configured order, then the rest by size). Pure + deterministic so it
  *  can run in the server component. */

@@ -13,7 +13,7 @@ const INITIAL_COUNT = 20;
 const CHUNK = 40;
 
 type Props = {
-    /** Native Arc markets, already converted to the serializable card model. */
+    /** Native BOT Chain markets, already converted to the serializable card model. */
     native: NativeCardModel[];
     /** Polymarket discovery events — rendered after the native block. */
     events: PolymarketEvent[];

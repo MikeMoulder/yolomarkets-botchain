@@ -116,7 +116,7 @@ export default async function HomePage({
                 <div className="relative mx-auto max-w-[1440px] px-6 py-6 md:py-10">
                     <div className="flex items-end gap-x-8 overflow-x-auto no-scrollbar -mx-6 px-6 md:mx-0 md:px-0 md:flex-wrap md:gap-x-10 md:gap-y-5 md:overflow-visible divide-x divide-border/60">
                         <Stat
-                            label="tradeable on arc"
+                            label="tradeable on BOT Chain"
                             value={activeNativeMarkets.length.toString()}
                             unit="live markets"
                         />
@@ -126,7 +126,7 @@ export default async function HomePage({
                             unit="across markets"
                         />
                         <Stat label="categories" value={categoryCount.toString()} unit="tracked" />
-                        <Stat label="settlement" value="USDC" unit="native gas · Arc" />
+                        <Stat label="settlement" value="USDT" unit="Bohr testnet" />
                         <Stat label="latency" value="sub-second" unit="finality" />
                     </div>
                 </div>

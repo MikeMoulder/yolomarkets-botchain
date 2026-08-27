@@ -176,7 +176,7 @@ function Footer({ right }: { right: string }) {
             <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
                 <Wordmark />
                 <div style={{ display: "flex", width: 1, height: 22, backgroundColor: C.borderStrong }} />
-                <div style={{ display: "block", fontSize: 19, color: C.mute }}>prediction markets on Arc</div>
+                <div style={{ display: "block", fontSize: 19, color: C.mute }}>prediction markets on BOT Chain</div>
             </div>
             <div style={{ display: "block", fontSize: 19, color: C.faint, letterSpacing: 1.2 }}>{right}</div>
         </div>

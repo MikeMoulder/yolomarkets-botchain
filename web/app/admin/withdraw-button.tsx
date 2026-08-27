@@ -86,7 +86,7 @@ export function WithdrawButton({ market, recipient, withdrawable, legacy = false
             </button>
             {hash && (
                 <a
-                    href={`https://testnet.arcscan.app/tx/${hash}`}
+                    href={`https://scan.bohr.life/tx/${hash}`}
                     target="_blank"
                     rel="noreferrer"
                     className="text-[10px] num text-text-faint hover:text-text-dim"

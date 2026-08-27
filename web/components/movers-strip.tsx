@@ -6,7 +6,7 @@ type Props = {
     movers: NativeMover[];
 };
 
-/** Horizontal strip of native Arc markets ranked by the largest 24h move
+/** Horizontal strip of native BOT Chain markets ranked by the largest 24h move
  *  in their Polymarket counterpart. Cards link straight to the on-chain
  *  trade page (`/markets/<address>`), not the catalog detail. */
 export function MoversStrip({ movers }: Props) {
@@ -24,7 +24,7 @@ export function MoversStrip({ movers }: Props) {
                             Biggest movers
                         </h2>
                         <span className="text-[11px] text-text-faint num lowercase">
-                            tradeable on arc · last 24h
+                            tradeable on BOT Chain · last 24h
                         </span>
                     </div>
                     <span className="num text-[10.5px] text-text-faint tabular">

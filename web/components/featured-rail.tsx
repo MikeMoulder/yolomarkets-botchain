@@ -19,7 +19,7 @@ export function FeaturedRail({ items }: { items: NativeCardModel[] }) {
                             Featured
                         </h2>
                         <span className="text-[11px] text-text-faint num lowercase">
-                            top markets · live on arc
+                            top markets · live on BOT Chain
                         </span>
                     </div>
                 </header>

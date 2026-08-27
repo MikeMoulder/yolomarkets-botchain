@@ -9,9 +9,9 @@ const PRODUCT = [
 ];
 
 const RESOURCES = [
-    { href: "https://testnet.arcscan.app", label: "Arc Explorer", external: true },
-    { href: "https://faucet.circle.com", label: "USDC Faucet", external: true },
-    { href: "https://rpc.testnet.arc.network", label: "Arc RPC", external: true },
+    { href: "https://scan.bohr.life", label: "Bohr Explorer", external: true },
+    { href: "https://faucet.bohr.life/basic/", label: "tBOT Faucet", external: true },
+    { href: "https://rpc.bohr.life", label: "Bohr RPC", external: true },
 ];
 
 const LEGAL = [
@@ -40,7 +40,7 @@ export function Footer() {
                             </span>
                         </Link>
                         <p className="text-[12.5px] leading-[1.6] text-text-dim">
-                            Real-world prediction markets settled in USDC on Arc.
+                            Real-world prediction markets settled in USDT on BOT Chain.
                             An autonomous agent reads the news, sizes by Kelly,
                             and trades on your behalf.
                         </p>

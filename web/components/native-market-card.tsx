@@ -41,7 +41,7 @@ type Props = {
     m: NativeCardModel;
 };
 
-/** A native YOLO market card — these are actually tradeable on Arc. Below
+    /** A native YOLO market card — these are actually tradeable on BOT Chain. Below
  *  `sm` the card collapses into a compact horizontal row (small thumbnail,
  *  two-line title) so a phone screen fits several markets instead of one.
  */

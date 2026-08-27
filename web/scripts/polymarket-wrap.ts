@@ -7,8 +7,7 @@
  *   npm run markets:poly:wrap -- --limit 300 --seed-usdc 1 --min-volume-24h 1000
  *   npm run markets:poly:wrap -- --limit 120 --seed-usdc 1
  */
-import { config as loadEnv } from "dotenv";
-import path from "node:path";
+import "./load-env";
 import {
     createPublicClient,
     createWalletClient,
@@ -20,14 +19,12 @@ import {
     type Address,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { arcTestnet } from "../lib/chain";
+import { activeChain } from "../lib/chain";
 import { ADDRESSES, erc20Abi, factoryAbi, marketAbi } from "../lib/contracts";
 import {
     buildPolymarketMirrorCriteria,
     type PolymarketMirrorMeta,
 } from "../lib/polymarket-mirror";
-
-loadEnv({ path: path.resolve(__dirname, "..", "..", ".env") });
 
 const GAMMA_BASE =
     process.env.POLYMARKET_GAMMA_URL ?? "https://gamma-api.polymarket.com";
@@ -89,11 +86,11 @@ function env(name: string): string {
 }
 
 function getRpcUrls(): string[] {
-    const multi = process.env.ARC_TESTNET_RPC_URLS?.split(",")
+    const multi = process.env.BOTCHAIN_RPC_URLS?.split(",")
         .map((x) => x.trim())
         .filter(Boolean) ?? [];
-    const one = process.env.ARC_TESTNET_RPC_URL?.trim();
-    const urls = [...multi, ...(one ? [one] : []), ...arcTestnet.rpcUrls.default.http];
+    const one = process.env.BOTCHAIN_RPC_URL?.trim();
+    const urls = [...multi, ...(one ? [one] : []), ...activeChain.rpcUrls.default.http];
     return [...new Set(urls)];
 }
 
@@ -337,6 +334,7 @@ async function readExistingQuestions(
     // list duplicates side by side.
     const addrs: Address[] = [];
     for (const factory of [ADDRESSES.factory, ADDRESSES.factoryLegacy]) {
+        if (!factory || factory === "0x0000000000000000000000000000000000000000") continue;
         addrs.push(
             ...((await publicClient.readContract({
                 address: factory,
@@ -349,17 +347,30 @@ async function readExistingQuestions(
     const questions: string[] = [];
     for (let i = 0; i < addrs.length; i += MARKET_READ_BATCH_SIZE) {
         const batch = addrs.slice(i, i + MARKET_READ_BATCH_SIZE);
-        const rows = await publicClient.multicall({
-            allowFailure: true,
-            contracts: batch.map((address) => ({
-                address,
-                abi: marketAbi,
-                functionName: "question",
-            })),
-        });
-        for (const row of rows) {
-            if (row.status === "success" && typeof row.result === "string") {
-                questions.push(row.result);
+        if (activeChain.contracts?.multicall3) {
+            const rows = await publicClient.multicall({
+                allowFailure: true,
+                contracts: batch.map((address) => ({
+                    address,
+                    abi: marketAbi,
+                    functionName: "question",
+                })),
+            });
+            for (const row of rows) {
+                if (row.status === "success" && typeof row.result === "string") {
+                    questions.push(row.result);
+                }
+            }
+        } else {
+            const rows = await Promise.allSettled(
+                batch.map((address) =>
+                    publicClient.readContract({ address, abi: marketAbi, functionName: "question" }),
+                ),
+            );
+            for (const row of rows) {
+                if (row.status === "fulfilled" && typeof row.value === "string") {
+                    questions.push(row.value);
+                }
             }
         }
         if (i + MARKET_READ_BATCH_SIZE < addrs.length) {
@@ -389,7 +400,7 @@ async function ensureApproval(
         functionName: "approve",
         args: [ADDRESSES.factory, (1n << 256n) - 1n],
         account,
-        chain: arcTestnet,
+        chain: activeChain,
     });
     await publicClient.waitForTransactionReceipt({ hash: tx });
     console.log(`[poly-wrap] approved factory tx=${tx}`);
@@ -411,12 +422,12 @@ async function main() {
     const nowSec = Math.floor(Date.now() / 1000);
 
     const publicClient = createPublicClient({
-        chain: arcTestnet,
+        chain: activeChain,
         transport: fallback(rpcUrls.map((url) => http(url))),
     });
     const walletClient = createWalletClient({
         account,
-        chain: arcTestnet,
+        chain: activeChain,
         transport: fallback(rpcUrls.map((url) => http(url))),
     });
 
@@ -469,7 +480,7 @@ async function main() {
             functionName: "createMarket",
             args: [item.title, item.category, item.criteria, item.deadline, seedUsdc],
             account,
-            chain: arcTestnet,
+            chain: activeChain,
         });
         await publicClient.waitForTransactionReceipt({ hash: tx });
         console.log(`[poly-wrap] created ${i + 1}/${plan.length} tx=${tx} ${item.slug}`);

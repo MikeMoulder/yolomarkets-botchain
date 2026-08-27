@@ -149,7 +149,7 @@ export function SetupWizard({
                     / how it works
                 </span>
                 <span>
-                    Your agent gets two Circle wallets: one holds your USDC and
+                    Your agent gets two wallets: one holds your USDT and
                     places the trades, and a second, much smaller one covers its
                     own running costs. Circle&rsquo;s MPC signs for both, so no
                     private key is ever held by us or by the agent, and it keeps
@@ -617,7 +617,7 @@ function BudgetField({
                     onChange={(e) => onChange(Number(e.target.value) || 0)}
                     className="num text-[20px] bg-transparent border-0 outline-none w-full tabular text-text"
                 />
-                <span className="text-[10px] text-text-faint num">USDC</span>
+                <span className="text-[10px] text-text-faint num">USDT</span>
             </div>
         </label>
     );
@@ -701,7 +701,7 @@ function Step5Deploy({
                     Create your Circle agent wallet
                 </h2>
                 <p className="text-[12.5px] text-text-dim mt-2 max-w-[60ch]">
-                    A Developer-Controlled wallet on Arc holds the USDC your
+                    A wallet on Bohr holds the USDT your
                     agent trades with. Circle signs agent transactions
                     server-side, so the runner can act while you are offline.
                 </p>
@@ -925,7 +925,7 @@ function Step7Fund({
                     Fund your agent
                 </h2>
                 <p className="text-[12.5px] text-text-dim mt-2 max-w-[60ch]">
-                    Send USDC to the Circle agent wallet so it has a balance to
+                    Send USDT to the agent wallet so it has a balance to
                     trade with and pay reasoning requests.
                 </p>
             </div>

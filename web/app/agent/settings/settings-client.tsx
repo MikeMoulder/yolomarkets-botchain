@@ -350,7 +350,7 @@ function CircleAgentWalletCard({
                     address
                 </span>
                 <a
-                    href={`https://testnet.arcscan.app/address/${agentAddress}`}
+                    href={`https://scan.bohr.life/address/${agentAddress}`}
                     target="_blank"
                     rel="noreferrer"
                     className="num text-text-dim tabular break-all hover:text-text"

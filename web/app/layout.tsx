@@ -25,14 +25,14 @@ export const metadata: Metadata = {
         template: "%s · yolomarkets.",
     },
     description:
-        "Real-world prediction markets settled in USDC on Arc. An autonomous agent reads the news, sizes by Kelly, and trades on your behalf.",
+        "Real-world prediction markets settled in USDT on BOT Chain. An autonomous agent reads the news, sizes by Kelly, and trades on your behalf.",
     // Resolves relative OG image URLs (including the per-market share cards at
     // app/markets/[address]/opengraph-image.tsx). Pointing at the wrong origin
     // silently breaks every link unfurl, so it follows NEXT_PUBLIC_SITE_URL.
     metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://yolomarkets.fun"),
     openGraph: {
         title: "yolomarkets.",
-        description: "Prediction markets on Arc, with an autonomous agent.",
+        description: "Prediction markets on BOT Chain, with an autonomous agent.",
         type: "website",
     },
 };

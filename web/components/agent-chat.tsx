@@ -56,7 +56,7 @@ type ChatEvent =
 const SUGGESTIONS = [
     "What can you do?",
     "Show my positions",
-    "How do I get testnet USDC?",
+    "How do I get testnet USDT?",
     "Explain your recent trades",
 ];
 
@@ -170,7 +170,7 @@ export function AgentChat() {
         }
     }
 
-    // Execute a prepared order on the user's own connected wallet: USDC approve
+                // Execute a prepared order on the user's own connected wallet: USDT approve
     // (if needed) → buy. The agent never signs this — the wallet prompt is the
     // authorization.
     async function confirmTrade(order: Order) {
@@ -369,7 +369,7 @@ export function AgentChat() {
                                     </div>
                                     {!proposal.sufficient_balance && (
                                         <div className="mb-3 text-[11.5px] text-no num">
-                                            Not enough USDC (${proposal.wallet_balance_usdc.toFixed(2)}) to
+                                            Not enough USDT (${proposal.wallet_balance_usdc.toFixed(2)}) to
                                             cover the max cost.
                                         </div>
                                     )}
@@ -399,7 +399,7 @@ export function AgentChat() {
                                 <div className="flex items-center gap-2 text-[12.5px] text-text-mute num">
                                     <span className="h-1.5 w-1.5 rounded-full bg-accent live-dot" />
                                     {tx.stage === "approving"
-                                        ? "Approving USDC — confirm in your wallet…"
+                                        ? "Approving USDT — confirm in your wallet…"
                                         : "Placing the trade — confirm in your wallet…"}
                                 </div>
                             )}
@@ -407,7 +407,7 @@ export function AgentChat() {
                                 <div className="text-[12.5px] text-yes num">
                                     ✓ Confirmed ·{" "}
                                     <a
-                                        href={`https://testnet.arcscan.app/tx/${tx.hash}`}
+                                        href={`https://scan.bohr.life/tx/${tx.hash}`}
                                         target="_blank"
                                         rel="noreferrer"
                                         className="text-accent hover:text-text break-all"

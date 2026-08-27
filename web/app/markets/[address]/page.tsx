@@ -42,7 +42,7 @@ export async function generateMetadata({
     if (!m) return { title: "Market" };
 
     const prob = Math.round(priceToProb(m.priceYes) * 100);
-    const description = `${prob}% YES · ${m.category} · closes ${formatAbs(m.deadline)} — trade it on Arc with USDC.`;
+    const description = `${prob}% YES · ${m.category} · closes ${formatAbs(m.deadline)} — trade it on BOT Chain with USDT.`;
     return {
         title: m.question,
         description,
@@ -104,7 +104,7 @@ export default async function MarketPage({
                 </span>
                 <span className="text-text-faint">·</span>
                 <a
-                    href={`https://testnet.arcscan.app/address/${m.address}`}
+                    href={`https://scan.bohr.life/address/${m.address}`}
                     target="_blank"
                     rel="noreferrer"
                     className="num normal-case tracking-normal text-text-dim hover:text-text transition-colors"
@@ -192,7 +192,7 @@ export default async function MarketPage({
                                 k="contract"
                                 v={
                                     <a
-                                        href={`https://testnet.arcscan.app/address/${m.address}`}
+                                        href={`https://scan.bohr.life/address/${m.address}`}
                                         target="_blank"
                                         rel="noreferrer"
                                         className="hover:text-text"
@@ -205,7 +205,7 @@ export default async function MarketPage({
                                 k="settlement"
                                 v={
                                     <a
-                                        href={`https://testnet.arcscan.app/address/${ADDRESSES.usdc}`}
+                                        href={`https://scan.bohr.life/address/${ADDRESSES.usdc}`}
                                         target="_blank"
                                         rel="noreferrer"
                                         className="hover:text-text"
@@ -214,7 +214,7 @@ export default async function MarketPage({
                                     </a>
                                 }
                             />
-                            <Detail k="liquidity" v={`$${formatUsdc(m.totalLiquidity)} USDC`} />
+                            <Detail k="liquidity" v={`$${formatUsdc(m.totalLiquidity)} USDT`} />
                             {revenue && (
                                 <Detail
                                     k="protocol fee"

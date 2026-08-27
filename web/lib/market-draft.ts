@@ -28,7 +28,7 @@ export const CATEGORIES = [
     // Curated house rail — sits directly under Biggest Movers on the homepage.
     // Deliberately absent from `classifyCategoryFromText`: it is an editorial
     // pick, never something auto-inferred from the question text.
-    "Arc Special",
+    "BOT Special",
     "Crypto",
     "Sports",
     "Politics",
@@ -111,7 +111,7 @@ export function parseDeadline(raw: string, nowSec = Math.floor(Date.now() / 1000
 
 // ── Seed liquidity ──────────────────────────────────────────────────────────
 
-/** USDC is 6-dec on Arc; anything finer would be silently truncated by
+/** USDT is 6-dec on Bohr; anything finer would be silently truncated by
  *  `parseUnits`, so round here where we can tell the admin about it. */
 export function parseSeed(raw: string): ParseResult<number> {
     const cleaned = raw.trim().replace(/^\$/, "").replace(/,/g, "").replace(/\s*usdc$/i, "");

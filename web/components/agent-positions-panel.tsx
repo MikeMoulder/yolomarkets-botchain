@@ -12,7 +12,7 @@ export type SerializablePosition = {
     exitProceeds: string; // micro
 };
 
-const ARCSCAN_TX = "https://testnet.arcscan.app/tx/";
+const EXPLORER_TX = "https://scan.bohr.life/tx/";
 
 function fmtUsd(micro: bigint): string {
     return `$${(Number(micro) / 1e6).toFixed(2)}`;
@@ -134,7 +134,7 @@ function WithdrawRow({
                     >
                         {tx ? (
                             <a
-                                href={`${ARCSCAN_TX}${tx}`}
+                                href={`${EXPLORER_TX}${tx}`}
                                 target="_blank"
                                 rel="noreferrer"
                                 className="hover:text-text underline"
@@ -308,7 +308,7 @@ function PositionRow({
                 <div className={`num text-[11px] ${tx ? "text-yes" : "text-no"}`}>
                     {tx ? (
                         <a
-                            href={`${ARCSCAN_TX}${tx}`}
+                            href={`${EXPLORER_TX}${tx}`}
                             target="_blank"
                             rel="noreferrer"
                             className="hover:text-text underline"

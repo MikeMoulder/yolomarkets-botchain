@@ -147,7 +147,7 @@ export default async function PolymarketDetailPage({
                                     / catalog only
                                 </span>
                                 <p className="text-[13px] text-text-dim leading-snug">
-                                    This event isn&apos;t yet wrapped to a YOLO market on Arc.
+                                    This event isn&apos;t yet wrapped to a YOLO market on BOT Chain.
                                     Propose it to the admin to deploy before it can be traded here.
                                 </p>
                             </div>

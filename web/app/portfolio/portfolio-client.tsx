@@ -134,7 +134,7 @@ export function PortfolioClient({ markets }: { markets: PortfolioMarket[] }) {
             {/* Summary */}
             <div className="grid grid-cols-2 md:grid-cols-5 gap-px bg-border border border-border">
                 <SummaryCell
-                    label="USDC balance"
+                    label="USDT balance"
                     value={usdc !== undefined ? `$${formatUsdc(usdc)}` : "—"}
                 />
                 <SummaryCell label="open positions" value={openRows.length.toString()} />

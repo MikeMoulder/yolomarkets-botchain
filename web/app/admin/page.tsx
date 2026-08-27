@@ -35,7 +35,7 @@ export default async function AdminPage() {
     const events = eventsRes.status === "fulfilled" ? eventsRes.value : [];
     const native = nativeRes.status === "fulfilled" ? nativeRes.value : [];
 
-    // Build a set of normalized native questions so we can flag "already on Arc"
+    // Build a set of normalized native questions so we can flag "already on BOT Chain"
     const nativeQuestionSet = new Set(
         native.map((m) => m.question.trim().toLowerCase()),
     );
@@ -104,7 +104,7 @@ export default async function AdminPage() {
                             Market deployment
                         </h1>
                         <p className="mt-1.5 text-[12.5px] text-text-dim max-w-[60ch] leading-[1.55]">
-                            Wrap any reference binary event into a YOLO market on Arc by
+                            Wrap any reference binary event into a YOLO market on BOT Chain by
                             calling{" "}
                             <span className="num text-text">
                                 MarketFactory.createMarket
@@ -141,7 +141,7 @@ export default async function AdminPage() {
                         value={String(native.length)}
                         unit="native markets"
                     />
-                    <Stat label="settlement" value="USDC" unit="6-dec, Arc native" />
+                    <Stat label="settlement" value="USDT" unit="6-dec, Bohr testnet" />
                     <Stat label="factory" value="0x1BED…7441" unit="MarketFactory" />
                 </div>
             </header>

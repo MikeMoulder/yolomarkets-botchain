@@ -445,7 +445,7 @@ export function BetTicket({
                             {isWin && (
                                 <RowKV
                                     k="claimable payout"
-                                    v={<span className="text-yes font-medium">${formatUsdc(claimablePayout)} USDC</span>}
+                                    v={<span className="text-yes font-medium">${formatUsdc(claimablePayout)} USDT</span>}
                                 />
                             )}
                             {sharesYes > 0n && (
@@ -480,7 +480,7 @@ export function BetTicket({
                                 onClick={() => switchChain({ chainId: arcTestnet.id })}
                                 className="w-full h-11 border border-warn/40 bg-warn/10 text-warn text-[13px] hover:bg-warn/20 transition-colors"
                             >
-                                switch to Arc to claim
+                                switch to Bohr to claim
                             </button>
                         ) : (
                             <button
@@ -507,7 +507,7 @@ export function BetTicket({
                                 <div className="font-medium">{successMessage}</div>
                                 <a
                                     className="num mt-0.5 inline-block text-[11px] underline-offset-2 hover:underline"
-                                    href={`https://testnet.arcscan.app/tx/${successTxHash}`}
+                                    href={`https://scan.bohr.life/tx/${successTxHash}`}
                                     target="_blank"
                                     rel="noreferrer"
                                 >
@@ -683,7 +683,7 @@ export function BetTicket({
                 <label className="block">
                     <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.18em] text-text-mute mb-2">
                         <span>{mode === "buy" ? "spend" : "target receive"}</span>
-                        <span>USDC</span>
+                        <span>USDT</span>
                     </div>
                     <input
                         type="number"
@@ -763,12 +763,12 @@ export function BetTicket({
                         onClick={() => switchChain({ chainId: arcTestnet.id })}
                         className="w-full h-11 border border-warn/40 bg-warn/10 text-warn text-[13px] hover:bg-warn/20 transition-colors"
                     >
-                        switch to Arc to trade
+                        switch to Bohr to trade
                     </button>
                 ) : amountWei === 0n ? (
                     <ActionDisabled label="enter an amount" />
                 ) : insufficientFunds ? (
-                    <ActionDisabled label="insufficient USDC balance" />
+                    <ActionDisabled label="insufficient USDT balance" />
                 ) : mode === "sell" && ownedShares === 0n ? (
                     <ActionDisabled
                         label={`no ${side === Outcome.Yes ? "YES" : "NO"} shares to sell`}
@@ -825,7 +825,7 @@ export function BetTicket({
                             <div className="font-medium">{successMessage}</div>
                             <a
                                 className="num mt-0.5 inline-block text-[11px] underline-offset-2 hover:underline"
-                                href={`https://testnet.arcscan.app/tx/${successTxHash}`}
+                                href={`https://scan.bohr.life/tx/${successTxHash}`}
                                 target="_blank"
                                 rel="noreferrer"
                             >

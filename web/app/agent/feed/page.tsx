@@ -301,7 +301,7 @@ function TradeCard({
                                         k="tx"
                                         v={
                                             <a
-                                                href={`https://testnet.arcscan.app/tx/${d.tx_hash}`}
+                                                href={`https://scan.bohr.life/tx/${d.tx_hash}`}
                                                 target="_blank"
                                                 rel="noreferrer"
                                                 className="num text-accent hover:text-text transition-colors break-all text-[11px]"

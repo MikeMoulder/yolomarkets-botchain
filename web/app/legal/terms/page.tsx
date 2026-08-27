@@ -13,7 +13,7 @@ export default function TermsPage() {
                 {
                     heading: "Scope",
                     body: [
-                        "This application is provided for testing, demonstration, and product development on Arc testnet. Markets, balances, agent actions, and UI behavior may change without notice while the product is still being hardened.",
+                        "This application is provided for testing, demonstration, and product development on Bohr testnet. Markets, balances, agent actions, and UI behavior may change without notice while the product is still being hardened.",
                         "By using the app, you understand that all activity is experimental and may be reset, paused, or modified if a bug, security issue, or operational problem is discovered.",
                     ],
                 },

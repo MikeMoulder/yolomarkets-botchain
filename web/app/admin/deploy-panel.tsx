@@ -129,7 +129,7 @@ export function DeployPanel({ events }: { events: DeployableEvent[] }) {
                                     <div className="flex items-center gap-2 text-[10px] num uppercase tracking-[0.16em] text-text-faint mb-0.5">
                                         <span>{e.category}</span>
                                         {e.alreadyOnArc && (
-                                            <span className="text-yes">· on arc</span>
+                                            <span className="text-yes">· on BOT Chain</span>
                                         )}
                                     </div>
                                     <div className="text-[12.5px] text-text truncate">
@@ -160,7 +160,7 @@ export function DeployPanel({ events }: { events: DeployableEvent[] }) {
                 <div className="px-4 py-3 border-b border-border flex items-baseline gap-3">
                     <span className="section-number text-[11px] tabular">02</span>
                     <span className="text-[11px] uppercase tracking-[0.22em] text-text-mute num">
-                        Deploy to Arc
+                        Deploy to BOT Chain
                     </span>
                 </div>
 
@@ -172,13 +172,13 @@ export function DeployPanel({ events }: { events: DeployableEvent[] }) {
                     <div className="p-4 flex flex-col gap-3">
                         <p className="text-[12.5px] text-text-dim">
                             Wrong network. Switch to{" "}
-                            <span className="num text-text">Arc Testnet</span>.
+                            <span className="num text-text">Bohr Testnet</span>.
                         </p>
                         <button
                             onClick={() => switchChain({ chainId: arcTestnet.id })}
                             className="h-9 px-3 border border-warn/50 bg-warn/10 hover:bg-warn/20 text-warn text-[12px] num uppercase tracking-[0.18em] transition-colors rounded-sm"
                         >
-                            switch to arc
+                            switch to Bohr
                         </button>
                     </div>
                 ) : (
@@ -354,7 +354,7 @@ function DeployForm({
                             className="flex-1 bg-transparent px-2.5 py-1.5 text-[13px] num tabular outline-none w-full"
                         />
                         <span className="text-[10px] num tracking-[0.16em] text-text-mute pr-2">
-                            USDC
+                            USDT
                         </span>
                     </div>
                 </Field>
@@ -398,7 +398,7 @@ function DeployForm({
                             ? "1. signing…"
                             : approveMining
                                 ? "1. mining…"
-                                : "1. approve usdc"}
+                                : "1. approve USDT"}
                 </button>
                 <button
                     disabled={
@@ -435,7 +435,7 @@ function DeployForm({
                 <div className="text-[11px] num text-text-mute tabular border-t border-border pt-3">
                     tx:{" "}
                     <a
-                        href={`https://testnet.arcscan.app/tx/${createTxHash}`}
+                        href={`https://scan.bohr.life/tx/${createTxHash}`}
                         target="_blank"
                         rel="noreferrer"
                         className="text-accent hover:underline"

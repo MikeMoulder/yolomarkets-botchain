@@ -66,6 +66,8 @@ export const publicClient = createPublicClient({
     batch: { multicall: true },
 });
 
+const supportsMulticall = Boolean(arcTestnet.contracts?.multicall3);
+
 export type MarketSummary = {
     address: Address;
     question: string;
@@ -99,6 +101,36 @@ async function readMarketSummary(
     address: Address,
     legacy = false,
 ): Promise<MarketSummary> {
+    if (!supportsMulticall) {
+        const [question, category, deadline, priceYes, totalLiquidity, initialLiquidity, resolved, outcome, totalSharesYes, totalSharesNo] =
+            await Promise.all([
+                publicClient.readContract({ address, abi: marketAbi, functionName: "question" }),
+                publicClient.readContract({ address, abi: marketAbi, functionName: "category" }),
+                publicClient.readContract({ address, abi: marketAbi, functionName: "deadline" }),
+                publicClient.readContract({ address, abi: marketAbi, functionName: "priceYes" }),
+                publicClient.readContract({ address, abi: marketAbi, functionName: "totalLiquidity" }),
+                publicClient.readContract({ address, abi: marketAbi, functionName: "initialLiquidity" }),
+                publicClient.readContract({ address, abi: marketAbi, functionName: "resolved" }),
+                publicClient.readContract({ address, abi: marketAbi, functionName: "outcome" }),
+                publicClient.readContract({ address, abi: marketAbi, functionName: "totalSharesYes" }),
+                publicClient.readContract({ address, abi: marketAbi, functionName: "totalSharesNo" }),
+            ]);
+        return {
+            address,
+            question,
+            category,
+            deadline,
+            priceYes,
+            totalLiquidity,
+            initialLiquidity,
+            resolved,
+            outcome: outcome as Outcome,
+            totalSharesYes,
+            totalSharesNo,
+            legacy,
+        };
+    }
+
     const r = await publicClient.multicall({
         allowFailure: false,
         contracts: [
@@ -280,7 +312,9 @@ async function readSummaries(
     for (let i = 0; i < addrs.length; i += MARKET_READ_BATCH_SIZE) {
         const batch = addrs.slice(i, i + MARKET_READ_BATCH_SIZE);
         try {
-            rows.push(...await readMarketSummaryBatch(batch, legacy));
+            rows.push(...await (supportsMulticall
+                ? readMarketSummaryBatch(batch, legacy)
+                : Promise.all(batch.map((address) => readMarketSummary(address, legacy)))));
         } catch (err) {
             console.warn("[markets] batch read failed; falling back to per-market reads", err);
             const settled = await Promise.allSettled(
