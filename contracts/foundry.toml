@@ -16,7 +16,8 @@ remappings = [
 ]
 
 [rpc_endpoints]
-arc_testnet = "${ARC_TESTNET_RPC_URL}"
+botchain_mainnet = "${BOTCHAIN_RPC_URL}"
+bohr_testnet = "${BOTCHAIN_RPC_URL}"
 
 [fmt]
 line_length = 100

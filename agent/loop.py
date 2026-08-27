@@ -100,7 +100,9 @@ FACTORY_V2 = Web3.to_checksum_address(
 FACTORY_LEGACY = Web3.to_checksum_address(
     os.environ.get("AGENT_FACTORY_LEGACY_ADDRESS", "0x722E79eF3F1Ba1D306033B8e505f29c59c199EBA")
 )
-USDC = Web3.to_checksum_address("0x3600000000000000000000000000000000000000")
+USDC = Web3.to_checksum_address(
+    os.environ.get("SETTLEMENT_TOKEN_ADDRESS", "0x75edC9335175Fc0552D51D48439F229c10420fe3")
+)
 MULTICALL3 = Web3.to_checksum_address("0xcA11bde05977b3631167028862bE2a173976CA11")
 
 FACTORY_ABI = [
@@ -327,7 +329,7 @@ def get_web3() -> Web3:
                 else {"timeout": 10}
             )
             w3 = Web3(Web3.HTTPProvider(url, request_kwargs=kwargs))
-            expected_chain_id = int(os.environ.get("ARC_TESTNET_CHAIN_ID", "5042002"))
+            expected_chain_id = int(os.environ.get("BOTCHAIN_CHAIN_ID", "968"))
             if w3.is_connected() and int(w3.eth.chain_id) == expected_chain_id:
                 if url != urls[0]:
                     console.print(f"[yellow]Arc RPC fallback active:[/yellow] {url}")

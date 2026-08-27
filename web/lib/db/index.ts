@@ -6,19 +6,10 @@
  */
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { config as loadEnv } from "dotenv";
-import path from "node:path";
 import * as schema from "./schema";
 
 declare global {
     var __pgClient: ReturnType<typeof postgres> | undefined;
-}
-
-// In local dev, Next may only load web/.env.local. Fall back to repo-root
-// .env so shared settings (like Neon DATABASE_URL) are visible here too.
-if (!process.env.DATABASE_URL && process.env.NODE_ENV !== "production") {
-    const rootEnv = path.resolve(process.cwd(), "..", ".env");
-    loadEnv({ path: rootEnv });
 }
 
 const url = process.env.DATABASE_URL;

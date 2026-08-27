@@ -7,11 +7,10 @@ import {
     useWaitForTransactionReceipt,
     useWriteContract,
 } from "wagmi";
-import { arcTestnet } from "@/lib/chain";
+import { activeChain } from "@/lib/chain";
 import { ADDRESSES, erc20Abi } from "@/lib/contracts";
 import { EstimatePanel } from "@/components/estimate-panel";
 import { useActiveWallet } from "@/lib/use-active-wallet";
-import { useCirclePayment } from "@/lib/use-circle-payment";
 import { useWalletModal } from "@/components/wallet-modal";
 import type { Estimate } from "@/lib/llm";
 
@@ -34,7 +33,6 @@ export function PaidEstimatePanel({
     const { kind, isConnected, isWrongChain } = useActiveWallet();
     const { openWalletModal } = useWalletModal();
     const { switchChain } = useSwitchChain();
-    const { payViaCircle } = useCirclePayment();
 
     const [estimate, setEstimate] = useState<Estimate | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -45,7 +43,7 @@ export function PaidEstimatePanel({
     const { isLoading: paymentConfirming, isSuccess: paymentConfirmed } =
         useWaitForTransactionReceipt({
             hash: paymentHash,
-            chainId: arcTestnet.id,
+            chainId: activeChain.id,
             query: { enabled: !!paymentHash },
         });
 
@@ -121,25 +119,13 @@ export function PaidEstimatePanel({
         setStage("paying");
 
         try {
-            if (kind === "circle") {
-                // Circle MPC wallets can't sign via wagmi; route the USDC
-                // transfer through a Circle challenge. The returned hash is
-                // already mined, so the receipt hook below resolves at once.
-                const txHash = await payViaCircle({
-                    contractAddress: ADDRESSES.usdc,
-                    abiFunctionSignature: "transfer(address,uint256)",
-                    abiParameters: [insightRecipient, INSIGHT_FEE_MICRO.toString()],
-                });
-                setPaymentHash(txHash);
-            } else {
-                const txHash = await writeContractAsync({
-                    address: ADDRESSES.usdc,
-                    abi: erc20Abi,
-                    functionName: "transfer",
-                    args: [insightRecipient, INSIGHT_FEE_MICRO],
-                });
-                setPaymentHash(txHash);
-            }
+            const txHash = await writeContractAsync({
+                address: ADDRESSES.usdc,
+                abi: erc20Abi,
+                functionName: "transfer",
+                args: [insightRecipient, INSIGHT_FEE_MICRO],
+            });
+            setPaymentHash(txHash);
         } catch (e) {
             setError(e instanceof Error ? e.message : "payment failed");
             setStage("idle");
@@ -177,10 +163,10 @@ export function PaidEstimatePanel({
                     </button>
                 ) : wrongChain ? (
                     <button
-                        onClick={() => switchChain({ chainId: arcTestnet.id })}
+                        onClick={() => switchChain({ chainId: activeChain.id })}
                         className="w-full h-11 border border-warn/40 bg-warn/10 text-warn text-[13px] hover:bg-warn/20 transition-colors"
                     >
-                        switch to Arc to request
+                        switch to {activeChain.name} to request
                     </button>
                 ) : (
                     <button
@@ -196,7 +182,7 @@ export function PaidEstimatePanel({
                     <p className="text-[11px] text-text-mute">
                         payment tx:{" "}
                         <a
-                            href={`https://testnet.arcscan.app/tx/${paymentHash}`}
+                            href={`${activeChain.blockExplorers.default.url}/tx/${paymentHash}`}
                             target="_blank"
                             rel="noreferrer"
                             className="num text-text-dim hover:text-text underline-offset-2 hover:underline"

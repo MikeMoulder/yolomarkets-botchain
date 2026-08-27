@@ -99,7 +99,7 @@ _PLATFORM_FACTS = {
         "testnet USDC from the Circle faucet: https://faucet.circle.com."
     ),
     "fees": "Protocol fee is 0.3% of trade size, floored at $0.01. Gas is paid in USDC.",
-    "chain": "Arc testnet (a Circle L1), chain id 5042002; USDC is the settlement and gas token.",
+    "chain": "Bohr testnet, BOT Chain id 968; tBOT pays gas and canonical USDT is the settlement token.",
     "resources": (
         "Footer links: Arc block explorer https://testnet.arcscan.app (look up "
         "any transaction), the USDC faucet https://faucet.circle.com, and legal "

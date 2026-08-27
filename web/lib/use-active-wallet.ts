@@ -2,16 +2,15 @@
 
 import { type Address } from "viem";
 import { useAccount } from "wagmi";
-import { arcTestnet } from "@/lib/chain";
-import { useCircleWallet } from "@/lib/circle-session";
+import { activeChain } from "@/lib/chain";
 
-export type WalletKind = "external" | "circle" | null;
+export type WalletKind = "external" | null;
 
 export type ActiveWallet = {
     address: Address | null;
     kind: WalletKind;
     isConnected: boolean;
-    /** Only meaningful for external wallets; Circle SCA wallets are Arc-native. */
+    /** Whether the connected wallet is on the configured BOT network. */
     isWrongChain: boolean;
 };
 
@@ -25,23 +24,12 @@ export type ActiveWallet = {
  */
 export function useActiveWallet(): ActiveWallet {
     const { address, chainId, isConnected } = useAccount();
-    const { session } = useCircleWallet();
-
     if (isConnected && address) {
         return {
             address,
             kind: "external",
             isConnected: true,
-            isWrongChain: chainId !== arcTestnet.id,
-        };
-    }
-
-    if (session?.address) {
-        return {
-            address: session.address,
-            kind: "circle",
-            isConnected: true,
-            isWrongChain: false,
+            isWrongChain: chainId !== activeChain.id,
         };
     }
 

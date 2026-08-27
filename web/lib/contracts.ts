@@ -1,17 +1,19 @@
 import type { Address } from "viem";
 
+const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000" as Address;
+
 export const ADDRESSES = {
     // v2 role-separated factory (2026-06-18, audit H-1/H-2 hardened) — the
     // canonical factory since 2026-07-18: all new markets are created here,
     // resolution goes through the dedicated resolver key, and cancelled
     // markets refund via claimRefund().
-    factory: "0x7A31ED6d05D5B2C15f09dFca2bb69Df81f844ACd" as Address,
+    factory: (process.env.NEXT_PUBLIC_FACTORY_ADDRESS ?? ZERO_ADDRESS) as Address,
     // v1 factory, read-only legacy: ~13.8k markets with the OLD bytecode (no
     // cancellation refund; resolution = admin key). The catalog only surfaces
     // its unexpired markets; the portfolio still scans it so positions and
     // claims keep working until they age out.
-    factoryLegacy: "0x722E79eF3F1Ba1D306033B8e505f29c59c199EBA" as Address,
-    usdc: "0x3600000000000000000000000000000000000000" as Address,
+    factoryLegacy: (process.env.NEXT_PUBLIC_FACTORY_LEGACY_ADDRESS ?? ZERO_ADDRESS) as Address,
+    usdc: (process.env.NEXT_PUBLIC_SETTLEMENT_TOKEN_ADDRESS ?? "0x75edC9335175Fc0552D51D48439F229c10420fe3") as Address,
 } as const;
 
 export enum Outcome {

@@ -118,7 +118,7 @@ def _api_key() -> str:
 
 
 def _blockchain() -> str:
-    return os.environ.get("CIRCLE_BLOCKCHAIN", "ARC-TESTNET")
+    return os.environ.get("CIRCLE_BLOCKCHAIN", "BOTCHAIN-TESTNET")
 
 
 def _wallet_set_id() -> str:

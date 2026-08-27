@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     allowedDevOrigins: ["173.212.238.167"],
+    serverExternalPackages: ["postgres", "drizzle-orm"],
     images: {
         remotePatterns: [
             {

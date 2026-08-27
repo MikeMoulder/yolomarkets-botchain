@@ -4,8 +4,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
 import { WagmiProvider } from "wagmi";
 import { wagmiConfig } from "./wagmi";
-import { CircleWalletProvider } from "./circle-session";
-import { CircleConfirmProvider } from "./circle-confirm";
 import { WalletModalProvider } from "@/components/wallet-modal";
 
 export function Providers({ children }: { children: ReactNode }) {
@@ -23,11 +21,7 @@ export function Providers({ children }: { children: ReactNode }) {
     return (
         <WagmiProvider config={wagmiConfig}>
             <QueryClientProvider client={qc}>
-                <CircleWalletProvider>
-                    <CircleConfirmProvider>
-                        <WalletModalProvider>{children}</WalletModalProvider>
-                    </CircleConfirmProvider>
-                </CircleWalletProvider>
+                <WalletModalProvider>{children}</WalletModalProvider>
             </QueryClientProvider>
         </WagmiProvider>
     );
