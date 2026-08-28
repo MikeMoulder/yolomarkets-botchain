@@ -18,7 +18,6 @@ import {
 import { formatUsdc, shortAddr } from "@/lib/format";
 import { PATTERN_LIST, type PatternId, PATTERNS } from "@/lib/agent-patterns";
 import { signProfileOp } from "@/lib/client-auth";
-import { useCircleWallet } from "@/lib/circle-session";
 import { BridgeUsdc } from "@/components/bridge-usdc";
 
 type Category = { label: string; count: number };
@@ -39,7 +38,6 @@ export function SetupWizard({
 }) {
     const { address, isConnected } = useAccount();
     const { signMessageAsync } = useSignMessage();
-    const { session: circleSession } = useCircleWallet();
     const router = useRouter();
 
     const [step, setStep] = useState<Step>(1);
@@ -61,7 +59,7 @@ export function SetupWizard({
 
     useEffect(() => setMounted(true), []);
 
-    const activeAddress = address ?? circleSession?.address;
+    const activeAddress = address;
     const hasWagmiSigner = !!address && isConnected;
     const walletConnected = mounted && (!!activeAddress || hasWagmiSigner);
 
