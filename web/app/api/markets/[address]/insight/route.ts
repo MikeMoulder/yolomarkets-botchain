@@ -4,7 +4,7 @@ import {
     isAddress,
     type Hash,
 } from "viem";
-import { estimate } from "@/lib/llm";
+import { estimate, isEstimateProviderConfigured } from "@/lib/llm";
 import { getMarket, publicClient } from "@/lib/markets";
 import { ADDRESSES } from "@/lib/contracts";
 import { priceToProb } from "@/lib/format";
@@ -12,7 +12,7 @@ import { priceToProb } from "@/lib/format";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const INSIGHT_FEE_MICRO = 50_000n; // 0.05 USDC with 6 decimals
+const INSIGHT_FEE_MICRO = 50_000n; // 0.05 USDT with 6 decimals
 const ERC20_TRANSFER_TOPIC =
     "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
 const ERC20_TRANSFER_SELECTOR = "0xa9059cbb";
@@ -209,6 +209,15 @@ export async function POST(
         return NextResponse.json({ error: "invalid market address" }, { status: 400 });
     }
 
+    // Do this before inspecting or accepting a payment. A configured fee
+    // recipient must never make an unavailable AI provider look billable.
+    if (!isEstimateProviderConfigured()) {
+        return NextResponse.json(
+            { error: "AI provider not configured; set OPENROUTER_API_KEY or GEMINI_API_KEY" },
+            { status: 503, headers: { "cache-control": "no-store" } },
+        );
+    }
+
     const recipientRaw =
         process.env.AI_INSIGHT_FEE_RECIPIENT ??
         process.env.NEXT_PUBLIC_AI_INSIGHT_FEE_RECIPIENT;
@@ -285,7 +294,7 @@ export async function POST(
 
     if (!hasValidPayment) {
         return NextResponse.json(
-            { error: "missing 0.05 USDC payment transfer in tx" },
+            { error: "missing 0.05 USDT payment transfer in tx" },
             { status: 402 },
         );
     }

@@ -14,7 +14,7 @@ import { useActiveWallet } from "@/lib/use-active-wallet";
 import { useWalletModal } from "@/components/wallet-modal";
 import type { Estimate } from "@/lib/llm";
 
-const INSIGHT_FEE_USDC = "0.05";
+const INSIGHT_FEE_USDT = "0.05";
 const INSIGHT_FEE_MICRO = 50_000n; // 0.05 USDT with 6 decimals
 
 const insightRecipientRaw = process.env.NEXT_PUBLIC_AI_INSIGHT_FEE_RECIPIENT;
@@ -55,7 +55,7 @@ export function PaidEstimatePanel({
         if (stage === "paying") {
             return paymentConfirming ? "confirming payment..." : "waiting for wallet...";
         }
-        return `pay ${INSIGHT_FEE_USDC} USDT and request AI insight`;
+        return `pay ${INSIGHT_FEE_USDT} USDT and request AI insight`;
     }, [paymentConfirming, stage]);
 
     const requestedForHashRef = useRef<`0x${string}` | null>(null);
@@ -143,13 +143,13 @@ export function PaidEstimatePanel({
                     / ai estimate
                 </h3>
                 <span className="text-[10px] uppercase tracking-[0.15em] text-text-mute num">
-                    fee {INSIGHT_FEE_USDC} USDT
+                    fee {INSIGHT_FEE_USDT} USDT
                 </span>
             </div>
 
             <div className="px-5 py-6 space-y-4">
                 <p className="text-[13px] text-text-dim leading-relaxed">
-                    Insights are now on-demand. Pay {INSIGHT_FEE_USDC} USDT to request a fresh
+                    Insights are now on-demand. Pay {INSIGHT_FEE_USDT} USDT to request a fresh
                     AI estimate for this market. After payment confirmation, analysis and
                     sources will appear here.
                 </p>

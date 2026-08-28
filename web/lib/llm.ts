@@ -71,6 +71,10 @@ export type Estimate = {
     time_sensitivity: "low" | "medium" | "high";
 };
 
+export function isEstimateProviderConfigured(): boolean {
+    return Boolean(process.env.OPENROUTER_API_KEY || process.env.GEMINI_API_KEY);
+}
+
 type EstimateArgs = {
     question: string;
     criteria: string;
@@ -153,6 +157,7 @@ async function estimateWithGemini(args: EstimateArgs): Promise<Estimate | null> 
                 "x-goog-api-key": apiKey,
             },
             body: JSON.stringify(body),
+            signal: AbortSignal.timeout(Number(process.env.AI_INSIGHT_TIMEOUT_MS ?? "20000")),
             next: { revalidate: 300 },
         });
         if (!r.ok) {
@@ -185,6 +190,7 @@ async function estimateWithGeminiNoSearch(
                 "x-goog-api-key": apiKey,
             },
             body: JSON.stringify(geminiRequestBody(args, false)),
+            signal: AbortSignal.timeout(Number(process.env.AI_INSIGHT_TIMEOUT_MS ?? "20000")),
             next: { revalidate: 300 },
         });
         if (!r.ok) {
@@ -310,6 +316,7 @@ async function estimateWithOpenRouter(args: EstimateArgs): Promise<Estimate | nu
                 "X-Title": "YOLO Markets web",
             },
             body: JSON.stringify(body),
+            signal: AbortSignal.timeout(Number(process.env.AI_INSIGHT_TIMEOUT_MS ?? "20000")),
             // Server-render-time cache so multiple page hits don't re-bill us.
             next: { revalidate: 300 },
         });
