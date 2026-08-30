@@ -232,6 +232,43 @@ async function scanLegacyLive(addresses: Address[]): Promise<LegacyLive[]> {
 
     async function probeBatch(batch: Address[]): Promise<Address[]> {
         const failed: Address[] = [];
+        // Bohr does not deploy Multicall3 at the standard address. Use the
+        // direct-read path there; otherwise every legacy probe is reported as
+        // unprobeable even when the market itself is perfectly readable.
+        if (!supportsMulticall) {
+            const direct = await Promise.all(
+                batch.map(async (address) => {
+                    try {
+                        const [deadline, resolved] = await Promise.all([
+                            publicClient.readContract({
+                                address,
+                                abi: marketAbi,
+                                functionName: "deadline",
+                            }),
+                            publicClient.readContract({
+                                address,
+                                abi: marketAbi,
+                                functionName: "resolved",
+                            }),
+                        ]);
+                        return { address, deadline, resolved };
+                    } catch {
+                        return null;
+                    }
+                }),
+            );
+            for (const row of direct) {
+                if (!row) continue;
+                if (row.deadline > now && !row.resolved) {
+                    live.push({ address: row.address, deadline: row.deadline });
+                }
+            }
+            for (let i = 0; i < batch.length; i++) {
+                if (!direct[i]) failed.push(batch[i]);
+            }
+            return failed;
+        }
+
         const results = await publicClient.multicall({
             allowFailure: true,
             contracts: batch.flatMap((address) => [
