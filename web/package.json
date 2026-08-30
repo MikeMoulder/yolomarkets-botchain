@@ -20,6 +20,7 @@
     "markets:tg:suggest": "tsx scripts/telegram-suggest.ts",
     "telegram:bot": "tsx scripts/telegram-bot.ts",
     "wallets:standalone:generate": "tsx scripts/generate-standalone-wallets.ts",
+    "wallets:mainnet:generate": "tsx scripts/generate-mainnet-wallets.ts",
     "wallets:standalone:sweep": "tsx scripts/sweep-standalone-wallets.ts",
     "x402:demo": "tsx scripts/x402-insight-demo.ts"
   },

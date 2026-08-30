@@ -864,8 +864,34 @@ async function settleExpiredMarket(
     const start = Number(meta.startPrice);
     if (!Number.isFinite(start) || start <= 0) return;
 
+    const configured =
+        SYMBOLS.some((item) => item.symbol === meta.symbol) &&
+        WINDOWS.some((item) => item.label === meta.timeframe);
+
     const hadTrades = await marketHasTrades(publicClient, row);
     if (!hadTrades) {
+        // A previously configured timeframe (for example 1h) should not be
+        // rolled over forever after it is removed from the allowlist. Retire
+        // it as cancelled so its seed can be withdrawn and only the current
+        // configured set continues recycling.
+        if (!configured) {
+            const tx = await walletClient.writeContract({
+                address: FACTORY,
+                abi: factoryAbi,
+                functionName: "resolveMarket",
+                args: [row.address, Outcome.Cancelled],
+                account: resolveAccount,
+                chain: arcTestnet,
+            });
+            await publicClient.waitForTransactionReceipt({ hash: tx });
+            row.resolved = true;
+            console.log(
+                `[keeper] retired unconfigured empty ${meta.symbol} ${meta.timeframe} @ ${row.address} ` +
+                    `(cancelled, seed recoverable) tx=${tx}`,
+            );
+            return;
+        }
+
         const win = findWindow(meta.timeframe);
         const windowStart = alignedWindowStart(nowSec, win.seconds);
         let startClose = 0;

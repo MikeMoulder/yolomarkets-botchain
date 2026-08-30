@@ -170,6 +170,7 @@ function candidatesFromMarkets(
     includeGroupChildren: boolean,
     maxPerEvent: number,
     maxPerCategory: number,
+    minDaysUntil: number,
 ): Candidate[] {
     const out: Candidate[] = [];
     const seen = new Set<string>();
@@ -206,6 +207,7 @@ function candidatesFromMarkets(
             allowFallbackDeadlines,
         );
         if (deadline === null) continue;
+        if (Number(deadline) < nowSec + minDaysUntil * 86_400) continue;
         seen.add(sourceKey);
 
         const tokens = pickTokenIds(m);
@@ -416,6 +418,7 @@ async function main() {
     const includeGroupChildren = !flag("solo-only");
     const maxPerEvent = Number(arg("max-per-event", process.env.POLYMARKET_WRAP_MAX_PER_EVENT ?? "0"));
     const maxPerCategory = Number(arg("max-per-category", process.env.POLYMARKET_WRAP_MAX_PER_CATEGORY ?? "0"));
+    const minDaysUntil = Number(arg("min-days-until", "0"));
     const dryRun = flag("dry-run");
     const account = privateKeyToAccount(parsePrivateKey(env("DEPLOYER_PRIVATE_KEY")));
     const rpcUrls = getRpcUrls();
@@ -432,7 +435,7 @@ async function main() {
     });
 
     console.log(`[poly-wrap] account=${account.address}`);
-    console.log(`[poly-wrap] limit=${limit} scanLimit=${scanLimit} seed=${formatUnits(seedUsdc, 6)} minVolume24h=${minVolume24h} includeGroupChildren=${includeGroupChildren} maxPerEvent=${maxPerEvent} maxPerCategory=${maxPerCategory} dryRun=${dryRun}`);
+    console.log(`[poly-wrap] limit=${limit} scanLimit=${scanLimit} seed=${formatUnits(seedUsdc, 6)} minVolume24h=${minVolume24h} minDaysUntil=${minDaysUntil} includeGroupChildren=${includeGroupChildren} maxPerEvent=${maxPerEvent} maxPerCategory=${maxPerCategory} dryRun=${dryRun}`);
 
     const [markets, existing] = await Promise.all([
         fetchGammaMarkets(scanLimit),
@@ -448,6 +451,7 @@ async function main() {
         includeGroupChildren,
         maxPerEvent,
         maxPerCategory,
+        minDaysUntil,
     ).slice(0, limit);
 
     console.log(`[poly-wrap] plan=${plan.length}`);
