@@ -42,6 +42,18 @@ function sharesToFloat(shares: bigint): number {
     return Number(shares) / 1e6;
 }
 
+/** Local equivalent of PredictionMarket.priceYes() for a candidate state. */
+export function lmsrPriceYes(b: bigint, qYes: bigint, qNo: bigint): number {
+    const x = toFloat(qYes) / toFloat(b);
+    const y = toFloat(qNo) / toFloat(b);
+    const delta = x - y;
+    if (delta >= 0) {
+        return 1 / (1 + Math.exp(-delta));
+    }
+    const e = Math.exp(delta);
+    return e / (1 + e);
+}
+
 function feeOn(amount6: number): number {
     return Math.floor((amount6 * Number(PROTOCOL_FEE_BPS)) / 10_000);
 }

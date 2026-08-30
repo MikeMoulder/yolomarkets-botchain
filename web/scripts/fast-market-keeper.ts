@@ -52,16 +52,41 @@ type FastMeta = {
     startTs: number; // aligned candle open time (seconds)
 };
 
-const SYMBOLS: SymbolCfg[] = [
+const ALL_SYMBOLS: SymbolCfg[] = [
     { symbol: "BTC", coingeckoId: "bitcoin", binanceSymbol: "BTCUSDT" },
     { symbol: "ETH", coingeckoId: "ethereum", binanceSymbol: "ETHUSDT" },
     { symbol: "SOL", coingeckoId: "solana", binanceSymbol: "SOLUSDT" },
 ];
 
-const WINDOWS: WindowCfg[] = [
+const ALL_WINDOWS: WindowCfg[] = [
     { label: "15m", seconds: 15 * 60 },
     { label: "1h", seconds: 60 * 60 },
 ];
+
+function configuredList(name: string): string[] | null {
+    const raw = process.env[name]?.trim();
+    if (!raw) return null;
+    return raw
+        .split(",")
+        .map((value) => value.trim().toUpperCase())
+        .filter(Boolean);
+}
+
+const configuredSymbols = configuredList("FAST_MARKET_SYMBOLS");
+const configuredWindows = configuredList("FAST_MARKET_WINDOWS");
+const SYMBOLS: SymbolCfg[] = ALL_SYMBOLS.filter(
+    (item) => !configuredSymbols || configuredSymbols.includes(item.symbol),
+);
+const WINDOWS: WindowCfg[] = ALL_WINDOWS.filter(
+    (item) => !configuredWindows || configuredWindows.includes(item.label.toUpperCase()),
+);
+
+if (SYMBOLS.length === 0) {
+    throw new Error("FAST_MARKET_SYMBOLS did not select a supported symbol");
+}
+if (WINDOWS.length === 0) {
+    throw new Error("FAST_MARKET_WINDOWS did not select a supported timeframe");
+}
 
 const CATEGORY = "Fast";
 const AUTO_PREFIX = "AUTO_FAST:";
@@ -510,16 +535,13 @@ async function readMarketRow(
 ): Promise<MarketRow> {
     const [question, category, deadline, resolved, resolutionCriteria] =
         await withRetries(`read ${address}`, () =>
-            publicClient.multicall({
-                allowFailure: false,
-                contracts: [
-                    { address, abi: marketAbi, functionName: "question" },
-                    { address, abi: marketAbi, functionName: "category" },
-                    { address, abi: marketAbi, functionName: "deadline" },
-                    { address, abi: marketAbi, functionName: "resolved" },
-                    { address, abi: marketAbi, functionName: "resolutionCriteria" },
-                ],
-            }),
+            Promise.all([
+                publicClient.readContract({ address, abi: marketAbi, functionName: "question" }) as Promise<string>,
+                publicClient.readContract({ address, abi: marketAbi, functionName: "category" }) as Promise<string>,
+                publicClient.readContract({ address, abi: marketAbi, functionName: "deadline" }) as Promise<bigint>,
+                publicClient.readContract({ address, abi: marketAbi, functionName: "resolved" }) as Promise<boolean>,
+                publicClient.readContract({ address, abi: marketAbi, functionName: "resolutionCriteria" }) as Promise<string>,
+            ]) as Promise<[string, string, bigint, boolean, string]>,
         );
     const trades = await withRetries(`read tradeCount ${address}`, () =>
         readTradeCount(publicClient, address),
@@ -642,13 +664,10 @@ async function readMarketSettlementState(
     address: Address,
 ): Promise<{ resolved: boolean; outcome: Outcome }> {
     const [resolved, outcome] = await withRetries(`read settlement state ${address}`, () =>
-        publicClient.multicall({
-            allowFailure: false,
-            contracts: [
-                { address, abi: marketAbi, functionName: "resolved" },
-                { address, abi: marketAbi, functionName: "outcome" },
-            ],
-        }) as Promise<[boolean, Outcome]>,
+        Promise.all([
+            publicClient.readContract({ address, abi: marketAbi, functionName: "resolved" }) as Promise<boolean>,
+            publicClient.readContract({ address, abi: marketAbi, functionName: "outcome" }) as Promise<Outcome>,
+        ]) as Promise<[boolean, Outcome]>,
     );
 
     return { resolved, outcome };
@@ -827,7 +846,6 @@ async function sweepFastMarketResiduals(
 async function settleExpiredMarket(
     publicClient: ReturnType<typeof createPublicClient>,
     walletClient: ReturnType<typeof createWalletClient>,
-    owner: Account,
     resolveAccount: Account,
     nowSec: number,
     prices: Record<string, number>,
@@ -848,41 +866,64 @@ async function settleExpiredMarket(
 
     const hadTrades = await marketHasTrades(publicClient, row);
     if (!hadTrades) {
-        const cancelTx = await walletClient.writeContract({
+        const win = findWindow(meta.timeframe);
+        const windowStart = alignedWindowStart(nowSec, win.seconds);
+        let startClose = 0;
+        let source: FastMeta["source"] = "binance";
+        try {
+            startClose = await fetchBinanceCandleClose(
+                sym.binanceSymbol,
+                meta.timeframe,
+                windowStart,
+            );
+        } catch (err) {
+            startClose = prices[meta.symbol] ?? 0;
+            source = "coingecko";
+            console.warn(
+                `[keeper] Binance start close failed for rollover ${meta.symbol} ${meta.timeframe}; using CoinGecko spot`,
+                err,
+            );
+        }
+        if (!Number.isFinite(startClose) || startClose <= 0) return;
+
+        const nextMeta: FastMeta = {
+            version: 1,
+            symbol: meta.symbol,
+            timeframe: meta.timeframe,
+            source,
+            startPrice: startClose.toFixed(2),
+            startTs: windowStart,
+        };
+        const nextQuestion = buildQuestion(meta.symbol, meta.timeframe, nextMeta.startPrice);
+        const nextCriteria = buildResolutionCriteria(nextMeta);
+        const nextDeadline = windowStart + win.seconds;
+
+        const rolloverTx = await walletClient.writeContract({
             address: FACTORY,
             abi: factoryAbi,
-            functionName: "resolveMarket",
-            args: [row.address, Outcome.Cancelled],
+            functionName: "rolloverMarket",
+            args: [
+                row.address,
+                nextQuestion,
+                CATEGORY,
+                nextCriteria,
+                BigInt(nextDeadline),
+            ],
             account: resolveAccount,
             chain: arcTestnet,
         });
-        await publicClient.waitForTransactionReceipt({ hash: cancelTx });
+        await publicClient.waitForTransactionReceipt({ hash: rolloverTx });
 
-        const withdrawable = (await publicClient.readContract({
-            address: row.address,
-            abi: marketAbi,
-            functionName: "treasuryWithdrawable",
-        })) as bigint;
-
-        if (withdrawable > 0n) {
-            const withdrawTx = await walletClient.writeContract({
-                address: FACTORY,
-                abi: factoryAbi,
-                functionName: "withdrawMarketTreasury",
-                args: [row.address, owner.address, withdrawable],
-                account: owner,
-                chain: arcTestnet,
-            });
-            await publicClient.waitForTransactionReceipt({ hash: withdrawTx });
-            console.log(
-                `[keeper] cancelled ${meta.symbol} ${meta.timeframe} @ ${row.address} (no trades) and reclaimed ${formatUnits(withdrawable, 6)} USDC tx=${withdrawTx}`,
-            );
-        } else {
-            console.log(
-                `[keeper] cancelled ${meta.symbol} ${meta.timeframe} @ ${row.address} (no trades) tx=${cancelTx}`,
-            );
-        }
-        row.resolved = true;
+        row.question = nextQuestion;
+        row.category = CATEGORY;
+        row.deadline = BigInt(nextDeadline);
+        row.resolutionCriteria = nextCriteria;
+        row.resolved = false;
+        row.tradeCount = 0n;
+        console.log(
+            `[keeper] rolled over empty ${meta.symbol} ${meta.timeframe} @ ${row.address} ` +
+                `(seed retained, deadline=${nextDeadline}) tx=${rolloverTx}`,
+        );
         return;
     }
 
@@ -927,7 +968,6 @@ async function settleExpiredMarket(
 async function resolveExpired(
     publicClient: ReturnType<typeof createPublicClient>,
     walletClient: ReturnType<typeof createWalletClient>,
-    owner: Account,
     // Signs resolveMarket. On v2 this is the dedicated resolver key (the
     // factory role-separates settlement from funds); in --legacy-factory mode
     // it is the same admin key, since v1 resolution is admin-only.
@@ -942,7 +982,7 @@ async function resolveExpired(
     // set silently freezes while the process stays "up".
     for (const row of rows) {
         try {
-            await settleExpiredMarket(publicClient, walletClient, owner, resolveAccount, nowSec, prices, row);
+            await settleExpiredMarket(publicClient, walletClient, resolveAccount, nowSec, prices, row);
         } catch (err) {
             console.warn(`[keeper] failed to settle ${row.address}; will retry next loop`, err);
         }
@@ -1178,7 +1218,7 @@ async function main() {
             }
             const prices = await fetchUsdPrices(SYMBOLS);
             const rows = await syncTrackedFastMarkets(publicClient, state);
-            await resolveExpired(publicClient, walletClient, account, resolveAccount, nowSec, prices, rows);
+            await resolveExpired(publicClient, walletClient, resolveAccount, nowSec, prices, rows);
             for (const row of rows) {
                 if (row.resolved) state.tracked.delete(marketKey(row.address));
             }

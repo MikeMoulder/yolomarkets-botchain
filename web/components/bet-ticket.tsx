@@ -12,11 +12,13 @@ import { type Address } from "viem";
 import { arcTestnet } from "@/lib/chain";
 import { ADDRESSES, erc20Abi, marketAbi, Outcome } from "@/lib/contracts";
 import { formatCents, formatProb, formatUsdc, priceToProb } from "@/lib/format";
-import { lmsrBuyCost, lmsrSellProceeds } from "@/lib/lmsr";
+import { lmsrBuyCost, lmsrPriceYes, lmsrSellProceeds } from "@/lib/lmsr";
 import { useActiveWallet } from "@/lib/use-active-wallet";
 import { useWalletModal } from "@/components/wallet-modal";
 
 const SLIPPAGE_BPS = 200; // 2%
+const MIN_PRICE = 0.02;
+const MAX_PRICE = 0.98;
 const MAX_APPROVAL = (1n << 256n) - 1n;
 type TradeMode = "buy" | "sell";
 
@@ -192,6 +194,13 @@ export function BetTicket({
             if (mode === "buy") {
                 const previewBuy = (shares: bigint) =>
                     lmsrBuyCost(b, qy, qn, side, shares);
+                const withinPriceBand = (shares: bigint) => {
+                    const delta = shares * 1_000_000_000_000n;
+                    const nextYes = side === Outcome.Yes ? qy + delta : qy;
+                    const nextNo = side === Outcome.No ? qn + delta : qn;
+                    const nextPrice = lmsrPriceYes(b, nextYes, nextNo);
+                    return nextPrice >= MIN_PRICE && nextPrice <= MAX_PRICE;
+                };
 
                 const scaledPrice = BigInt(Math.max(1, Math.round(price * 1_000_000)));
                 let low = 0n;
@@ -201,7 +210,7 @@ export function BetTicket({
 
                 let highCost = previewBuy(high);
                 let expansions = 0;
-                while (highCost <= quoteBudget && expansions < 24) {
+                while (highCost <= quoteBudget && withinPriceBand(high) && expansions < 24) {
                     low = high;
                     lowCost = highCost;
                     high *= 2n;
@@ -212,7 +221,7 @@ export function BetTicket({
                 bestShares = low;
                 bestValue = lowCost;
 
-                if (highCost <= quoteBudget) {
+                if (highCost <= quoteBudget && withinPriceBand(high)) {
                     bestShares = high;
                     bestValue = highCost;
                 } else {
@@ -221,7 +230,7 @@ export function BetTicket({
                     while (left < right) {
                         const mid = (left + right + 1n) / 2n;
                         const midCost = previewBuy(mid);
-                        if (midCost <= quoteBudget) {
+                        if (midCost <= quoteBudget && withinPriceBand(mid)) {
                             bestShares = mid;
                             bestValue = midCost;
                             left = mid;
@@ -233,9 +242,16 @@ export function BetTicket({
             } else if (ownedShares > 0n) {
                 const previewSell = (shares: bigint) =>
                     lmsrSellProceeds(b, qy, qn, side, shares);
+                const withinPriceBand = (shares: bigint) => {
+                    const delta = shares * 1_000_000_000_000n;
+                    const nextYes = side === Outcome.Yes ? qy - delta : qy;
+                    const nextNo = side === Outcome.No ? qn - delta : qn;
+                    const nextPrice = lmsrPriceYes(b, nextYes, nextNo);
+                    return nextPrice >= MIN_PRICE && nextPrice <= MAX_PRICE;
+                };
 
                 const maxProceeds = previewSell(ownedShares);
-                if (maxProceeds <= amountWei) {
+                if (maxProceeds <= amountWei && withinPriceBand(ownedShares)) {
                     bestShares = ownedShares;
                     bestValue = maxProceeds;
                 } else {
@@ -244,7 +260,7 @@ export function BetTicket({
                     while (left < right) {
                         const mid = (left + right + 1n) / 2n;
                         const midProceeds = previewSell(mid);
-                        if (midProceeds <= amountWei) {
+                        if (midProceeds <= amountWei && withinPriceBand(mid)) {
                             bestShares = mid;
                             bestValue = midProceeds;
                             left = mid;

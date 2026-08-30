@@ -187,6 +187,65 @@ contract MarketFactoryTest is Test {
         assertEq(mkt.treasuryWithdrawable(), SEED);
     }
 
+    function test_factoryRollsOverNoTradeWithoutMovingSeed() public {
+        address m = _create("Q?", 1 days);
+        uint256 nextDeadline = block.timestamp + 2 days;
+        vm.warp(block.timestamp + 1 days + 1);
+
+        vm.prank(resolver);
+        factory.rolloverMarket(
+            m,
+            "Next Q?",
+            "Crypto",
+            "Next criteria",
+            nextDeadline
+        );
+
+        PredictionMarket mkt = PredictionMarket(m);
+        assertFalse(mkt.resolved());
+        assertEq(mkt.roundId(), 2);
+        assertEq(mkt.deadline(), nextDeadline);
+        assertEq(mkt.question(), "Next Q?");
+        assertEq(usdc.balanceOf(m), SEED);
+        assertEq(factory.marketCount(), 1);
+    }
+
+    function test_factoryCannotRolloverAfterTrade() public {
+        address m = _create("Q?", 1 days);
+        address alice = address(0xA11CE);
+        usdc.mint(alice, 100e6);
+        vm.prank(alice);
+        usdc.approve(m, type(uint256).max);
+        vm.prank(alice);
+        PredictionMarket(m).buy(PredictionMarket.Outcome.Yes, 1e6, 1e6);
+
+        vm.warp(block.timestamp + 1 days + 1);
+        vm.prank(resolver);
+        vm.expectRevert(PredictionMarket.HasTradingActivity.selector);
+        factory.rolloverMarket(
+            m,
+            "Overwritten?",
+            "Crypto",
+            "Must not be accepted.",
+            block.timestamp + 2 days
+        );
+    }
+
+    function test_rolloverByAdminReverts() public {
+        address m = _create("Q?", 1 days);
+        vm.warp(block.timestamp + 1 days + 1);
+
+        vm.prank(admin);
+        vm.expectRevert(MarketFactory.NotResolver.selector);
+        factory.rolloverMarket(
+            m,
+            "Next Q?",
+            "Crypto",
+            "Next criteria",
+            block.timestamp + 2 days
+        );
+    }
+
     function test_withdrawMarketTreasuryBeforeResolveReverts() public {
         address m = _create("Q?", 1 days);
 

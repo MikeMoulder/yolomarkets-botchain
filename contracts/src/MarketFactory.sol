@@ -134,6 +134,25 @@ contract MarketFactory {
         emit MarketResolved(market, outcome);
     }
 
+    /// @notice Reuse an expired fast market that had no trading activity.
+    ///         The market contract enforces the no-trade invariant and keeps
+    ///         its existing USDC seed in place.
+    function rolloverMarket(
+        address market,
+        string calldata question,
+        string calldata category,
+        string calldata resolutionCriteria,
+        uint256 deadline
+    ) external onlyResolver {
+        if (!isMarket[market]) revert UnknownMarket();
+        PredictionMarket(market).rollover(
+            deadline,
+            question,
+            category,
+            resolutionCriteria
+        );
+    }
+
     /// @notice Withdraw accrued fees / surplus from a market to `to`.
     function withdrawMarketTreasury(
         address market,

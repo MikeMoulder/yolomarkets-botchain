@@ -35,7 +35,10 @@ export function formatCents(p: number): string {
     const cents = p * 100;
     if (cents < 1) return `${cents.toFixed(2)}¢`;
     if (cents < 10) return `${cents.toFixed(1)}¢`;
-    return `${cents.toFixed(0)}¢`;
+    // Preserve one decimal place for thin-market prices such as 97.6¢;
+    // rounding these to whole cents can incorrectly show 100¢.
+    const rounded = Math.round(cents * 10) / 10;
+    return `${rounded % 1 === 0 ? rounded.toFixed(0) : rounded.toFixed(1)}¢`;
 }
 
 /** "3d 4h" / "12h 5m" / "8m" — relative time until a UNIX timestamp. */

@@ -90,6 +90,19 @@ export const factoryAbi = [
     },
     {
         type: "function",
+        name: "rolloverMarket",
+        stateMutability: "nonpayable",
+        inputs: [
+            { type: "address" },
+            { type: "string" },
+            { type: "string" },
+            { type: "string" },
+            { type: "uint256" },
+        ],
+        outputs: [],
+    },
+    {
+        type: "function",
         name: "withdrawMarketTreasury",
         stateMutability: "nonpayable",
         inputs: [{ type: "address" }, { type: "address" }, { type: "uint256" }],
@@ -154,6 +167,13 @@ export const marketAbi = [
     },
     {
         type: "function",
+        name: "roundId",
+        stateMutability: "view",
+        inputs: [],
+        outputs: [{ type: "uint256" }],
+    },
+    {
+        type: "function",
         name: "initialLiquidity",
         stateMutability: "view",
         inputs: [],
@@ -172,6 +192,20 @@ export const marketAbi = [
         stateMutability: "view",
         inputs: [],
         outputs: [{ type: "uint16" }],
+    },
+    {
+        type: "function",
+        name: "MIN_PRICE_YES",
+        stateMutability: "view",
+        inputs: [],
+        outputs: [{ type: "int256" }],
+    },
+    {
+        type: "function",
+        name: "MAX_PRICE_YES",
+        stateMutability: "view",
+        inputs: [],
+        outputs: [{ type: "int256" }],
     },
     {
         type: "function",

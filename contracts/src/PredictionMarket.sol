@@ -14,6 +14,10 @@ contract PredictionMarket is ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     uint16 public constant protocolFeeBps = 100; // 1.00%
+    // Keep thin markets tradeable without allowing one order to move the
+    // price all the way to 0 or 1. Values are SD59x18-scaled.
+    int256 public constant MIN_PRICE_YES = 20_000_000_000_000_000; // 2%
+    int256 public constant MAX_PRICE_YES = 980_000_000_000_000_000; // 98%
 
     enum Outcome {
         Unresolved,
@@ -22,12 +26,14 @@ contract PredictionMarket is ReentrancyGuard {
         Cancelled
     }
 
-    // ── Immutables ────────────────────────────────────────────────────────────
+    // ── Configuration ─────────────────────────────────────────────────────────
     IERC20 public immutable usdc;
     address public immutable admin;
-    uint256 public immutable deadline;
+    uint256 public deadline;
     uint256 public immutable initialLiquidity; // 6-dec USDC seed
     SD59x18 public immutable b; // liquidity parameter (18-dec)
+    // Starts at 1 and increments whenever an empty round is rolled over.
+    uint256 public roundId;
 
     string public question;
     string public category;
@@ -72,6 +78,12 @@ contract PredictionMarket is ReentrancyGuard {
         int256 newPriceYesRaw
     );
     event Resolved(Outcome outcome);
+    event RolledOver(
+        uint256 indexed previousRoundId,
+        uint256 indexed newRoundId,
+        uint256 newDeadline,
+        string question
+    );
     event Claimed(address indexed who, uint256 amount);
     event Refunded(address indexed who, uint256 amount);
     event TreasuryWithdrawn(address indexed to, uint256 amount);
@@ -92,6 +104,8 @@ contract PredictionMarket is ReentrancyGuard {
     error InsufficientReserves();
     error MarketCancelled();
     error NotCancelled();
+    error HasTradingActivity();
+    error PriceBandExceeded(int256 priceYesRaw);
 
     constructor(
         IERC20 _usdc,
@@ -109,6 +123,7 @@ contract PredictionMarket is ReentrancyGuard {
         admin = _admin;
         deadline = _deadline;
         initialLiquidity = _initialLiquidity;
+        roundId = 1;
         question = _question;
         category = _category;
         resolutionCriteria = _resolutionCriteria;
@@ -143,6 +158,7 @@ contract PredictionMarket is ReentrancyGuard {
             _outcome,
             _shares
         );
+        _enforcePriceBand(newQYes, newQNo);
         uint256 baseCost = _diffCostUp(qYes, qNo, newQYes, newQNo);
         uint256 fee = _feeOn(baseCost);
         cost = baseCost + fee;
@@ -199,6 +215,7 @@ contract PredictionMarket is ReentrancyGuard {
             _outcome,
             _shares
         );
+        _enforcePriceBand(newQYes, newQNo);
         uint256 gross = _diffCostDown(newQYes, newQNo, qYes, qNo);
         uint256 fee = _feeOn(gross);
         received = gross - fee;
@@ -251,6 +268,37 @@ contract PredictionMarket is ReentrancyGuard {
         resolved = true;
         outcome = _outcome;
         emit Resolved(_outcome);
+    }
+
+    /// @notice Reuse an expired market for a new round when nobody traded.
+    ///         The seed remains in this contract, avoiding cancellation,
+    ///         withdrawal, and redeployment gas. A round with any activity is
+    ///         never overwritten.
+    function rollover(
+        uint256 _newDeadline,
+        string calldata _question,
+        string calldata _category,
+        string calldata _resolutionCriteria
+    ) external {
+        if (msg.sender != admin) revert NotAdmin();
+        if (resolved) revert AlreadyResolved();
+        if (block.timestamp < deadline) revert BeforeDeadline();
+        if (
+            tradeCount != 0 ||
+            totalSharesYes != 0 ||
+            totalSharesNo != 0 ||
+            totalCostBasis != 0
+        ) revert HasTradingActivity();
+        require(_newDeadline > block.timestamp, "deadline in past");
+
+        uint256 previousRoundId = roundId;
+        deadline = _newDeadline;
+        question = _question;
+        category = _category;
+        resolutionCriteria = _resolutionCriteria;
+        roundId = previousRoundId + 1;
+
+        emit RolledOver(previousRoundId, roundId, _newDeadline, _question);
     }
 
     /// @notice After resolution, redeem winning shares 1:1 for USDC.
@@ -371,6 +419,16 @@ contract PredictionMarket is ReentrancyGuard {
     function _assertSolvent() internal view {
         if (usdc.balanceOf(address(this)) < reserveRequired())
             revert InsufficientReserves();
+    }
+
+    function _enforcePriceBand(
+        SD59x18 _qYes,
+        SD59x18 _qNo
+    ) internal view {
+        int256 p = _priceYesRaw(_qYes, _qNo);
+        if (p < MIN_PRICE_YES || p > MAX_PRICE_YES) {
+            revert PriceBandExceeded(p);
+        }
     }
 
     // ── Internal LMSR ─────────────────────────────────────────────────────────

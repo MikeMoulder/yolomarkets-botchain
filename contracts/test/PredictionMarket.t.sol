@@ -213,6 +213,42 @@ contract PredictionMarketTest is Test {
         mkt.resolve(PredictionMarket.Outcome.Unresolved);
     }
 
+    function test_rolloverNoTradeKeepsSeedAndMarketLive() public {
+        uint256 oldDeadline = mkt.deadline();
+        uint256 nextDeadline = oldDeadline + 1 days;
+
+        vm.warp(oldDeadline + 1);
+        vm.prank(admin);
+        mkt.rollover(
+            nextDeadline,
+            "Will it rain in the next round?",
+            "Weather",
+            "Resolves YES if NWS reports precipitation."
+        );
+
+        assertFalse(mkt.resolved());
+        assertEq(mkt.roundId(), 2);
+        assertEq(mkt.deadline(), nextDeadline);
+        assertEq(mkt.question(), "Will it rain in the next round?");
+        assertEq(mkt.totalLiquidity(), SEED);
+        assertEq(mkt.tradeCount(), 0);
+    }
+
+    function test_rolloverAfterTradeReverts() public {
+        vm.prank(alice);
+        mkt.buy(PredictionMarket.Outcome.Yes, 1e6, 1e6);
+
+        vm.warp(deadline + 1);
+        vm.prank(admin);
+        vm.expectRevert(PredictionMarket.HasTradingActivity.selector);
+        mkt.rollover(
+            deadline + 1 days,
+            "Overwritten?",
+            "Weather",
+            "Must not be accepted."
+        );
+    }
+
     function test_resolveCancelledOutcomeOk() public {
         vm.warp(deadline + 1);
         vm.prank(admin);
@@ -457,13 +493,35 @@ contract PredictionMarketTest is Test {
         assertGe(mkt.totalLiquidity(), mkt.totalSharesNo(), "insolvent vs NO");
     }
 
+    function test_priceBandRejectsBuyThatWouldReachExtreme() public {
+        // A single oversized order must fail atomically instead of moving the
+        // thin market to an apparent 100% probability.
+        vm.expectRevert();
+        vm.prank(alice);
+        mkt.buy(PredictionMarket.Outcome.Yes, 1_000e6, type(uint256).max);
+
+        assertEq(mkt.priceYes(), 0.5e18);
+        assertEq(mkt.tradeCount(), 0);
+        assertEq(mkt.totalSharesYes(), 0);
+    }
+
+    function test_priceBandRejectsBuyThatWouldReachZero() public {
+        vm.expectRevert();
+        vm.prank(alice);
+        mkt.buy(PredictionMarket.Outcome.No, 1_000e6, type(uint256).max);
+
+        assertEq(mkt.priceYes(), 0.5e18);
+        assertEq(mkt.tradeCount(), 0);
+        assertEq(mkt.totalSharesNo(), 0);
+    }
+
     // ── Fuzz ─────────────────────────────────────────────────────────────────
 
     /// Random buys keep price strictly in (0, 1e18).
     function testFuzz_priceBounded(uint96 yShares, uint96 nShares) public {
         // Bound to avoid exp() overflow: qYes/b < 100 → shares < 100*b/1e12 ≈ 14kUSDC
-        yShares = uint96(bound(uint256(yShares), 0, 1_000e6));
-        nShares = uint96(bound(uint256(nShares), 0, 1_000e6));
+        yShares = uint96(bound(uint256(yShares), 0, 20e6));
+        nShares = uint96(bound(uint256(nShares), 0, 20e6));
 
         usdc.mint(alice, 10_000e6);
 
@@ -481,8 +539,8 @@ contract PredictionMarketTest is Test {
         }
 
         int256 p = mkt.priceYes();
-        assertGt(p, 0);
-        assertLt(p, 1e18);
+        assertGe(p, mkt.MIN_PRICE_YES());
+        assertLe(p, mkt.MAX_PRICE_YES());
     }
 
     // ── Constructor ──────────────────────────────────────────────────────────

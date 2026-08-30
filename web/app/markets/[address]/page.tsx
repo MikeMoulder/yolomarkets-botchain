@@ -20,6 +20,7 @@ import {
     formatAbs,
     formatCents,
     formatOutcomeLabel,
+    formatProb,
     formatTimeUntil,
     formatUsdc,
     priceToProb,
@@ -41,8 +42,8 @@ export async function generateMetadata({
     const m = await withDeadline(getMarket(address as Address), SSR_DEADLINE_MS, "metadata:getMarket", null);
     if (!m) return { title: "Market" };
 
-    const prob = Math.round(priceToProb(m.priceYes) * 100);
-    const description = `${prob}% YES · ${m.category} · closes ${formatAbs(m.deadline)} — trade it on BOT Chain with USDT.`;
+    const prob = formatProb(priceToProb(m.priceYes));
+    const description = `${prob} YES · ${m.category} · closes ${formatAbs(m.deadline)} — trade it on BOT Chain with USDT.`;
     return {
         title: m.question,
         description,
