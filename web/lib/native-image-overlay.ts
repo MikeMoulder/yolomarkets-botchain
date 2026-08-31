@@ -40,6 +40,12 @@ const ASSET_OVERRIDES: { re: RegExp; image: string }[] = [
         re: /\b(SOL|Solana)\b/i,
         image: "https://polymarket-upload.s3.us-east-2.amazonaws.com/SOL-logo.png",
     },
+    {
+        // Use the current Federal Reserve chair for rate/FOMC markets rather
+        // than inheriting stale Powell artwork from a fuzzy Polymarket match.
+        re: /\b(fed|federal reserve|fomc|interest rates?|federal funds|monetary policy)\b/i,
+        image: "https://www.federalreserve.gov/aboutthefed/images/chairman-warsh-130x168.png",
+    },
 ];
 
 // ── Tokenization ──────────────────────────────────────────────────────────
@@ -83,10 +89,10 @@ const SYNONYMS: Record<string, string[]> = {
     eth: ["ethereum"], ethereum: ["eth"],
     btc: ["bitcoin"], bitcoin: ["btc"],
     sol: ["solana"], solana: ["sol"],
-    fed: ["federal", "fomc", "powell"],
-    fomc: ["fed", "federal", "powell"],
-    federal: ["fed", "fomc"],
-    powell: ["fed", "fomc", "federal"],
+    fed: ["federal", "fomc", "warsh"],
+    fomc: ["fed", "federal", "warsh"],
+    federal: ["fed", "fomc", "warsh"],
+    warsh: ["fed", "federal", "fomc"],
     rates: ["rate"], rate: ["rates"],
     nba: ["basketball", "playoffs", "champion", "champions", "finals"],
     lakers: ["nba", "basketball"],

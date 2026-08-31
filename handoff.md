@@ -28,7 +28,9 @@ Requested clone rollout:
 
 The mainnet deployer started with `0.34946948 BOT` and `3.929614` settlement-token units. The clone factory was deployed at `0x78b9d155c15907a2dc0cddc090d68bb31021B730`; its deployment used `3,840,136` gas. One mirror was then created successfully at `0x6E35071D77A6aD41Cd3A4000a409848190b306D8`, seeded with `$0.10`. Its long metadata used `1,618,454` gas, so the remaining rollout needs more BOT than the short-criteria testnet estimate.
 
-Current balances are `0.09783872 BOT` and `2.529614` settlement-token units. The two priority fast markets are live:
+Current balances are `0.09689168 BOT` and `0` settlement-token units. The deployer’s former `2.529614 USDT` balance was transferred to `0xabdE205255C472cDDe9E66E2f64BBBE11D28a5A9` in transaction `0x97828ded5d873223f1fea4d2e3ec867120540d923f56a3d44bfc43ba4cccce59`.
+
+The two priority fast markets are live:
 
 - BTC 1h: `0x61fb56BaBD028038af1d616B69315a4274da6fE8`, `$0.50` seed
 - ETH 1h: `0xf7f7eB21b0dcF0B3E1654d184580fa98110E124f`, `$0.50` seed
