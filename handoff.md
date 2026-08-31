@@ -3,6 +3,56 @@
 Updated: 2026-08-31
 Workspace: `C:\Users\DELL\Documents\Projects\yolomarkets`
 
+## Mainnet bootstrap update
+
+The isolated BOT Chain mainnet bootstrap remains separate from the other VPS PM2 applications. The original full-contract prototype is retained as a legacy, read-only deployment; the requested production rollout is being prepared against a fresh clone factory.
+
+- Chain: BOT Chain mainnet, chain ID `677`
+- RPC: `https://rpc.botchain.ai`
+- Explorer: `https://scan.botchain.ai`
+- Settlement token: BOT mainnet USDT, `0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C`
+- Legacy full mainnet factory: `0x0104ADA9fb323D47966d2fF2205aA41D068C09Df`
+- Factory admin: mainnet deployer `0x1Fc0a56Ead92760eE9f09C748F7B8cA0E9Eb45c9`
+- Factory resolver: `0x85B5124e1f677Ba8FE858f43B2A955903a62B5Da`
+
+Legacy market: `0x106d8a2b00d6a4D5b689172b6B5cCd84c80b3BCE`, seeded with `$0.10`.
+
+The legacy market is unresolved and has a 2027-07-01 deadline. Its deployed contract has no pre-deadline cancellation or withdrawal path, so it cannot be scrapped or withdrawn now; attempting it would only waste gas.
+
+Requested clone rollout:
+
+- 15 current eligible testnet mirror markets, excluding the legacy Brooklyn question to avoid a duplicate, seeded with `$0.10` each
+- BTC 1h and ETH 1h fast markets, seeded with `$0.50` each
+- Total seed allocation: `$2.50`
+- Fresh clone factory and clone markets; existing factories and unrelated PM2 processes remain untouched
+
+The mainnet deployer started with `0.34946948 BOT` and `3.929614` settlement-token units. The clone factory was deployed at `0x78b9d155c15907a2dc0cddc090d68bb31021B730`; its deployment used `3,840,136` gas. One mirror was then created successfully at `0x6E35071D77A6aD41Cd3A4000a409848190b306D8`, seeded with `$0.10`. Its long metadata used `1,618,454` gas, so the remaining rollout needs more BOT than the short-criteria testnet estimate.
+
+Current balances are `0.09783872 BOT` and `2.529614` settlement-token units. The two priority fast markets are live:
+
+- BTC 1h: `0x61fb56BaBD028038af1d616B69315a4274da6fE8`, `$0.50` seed
+- ETH 1h: `0xf7f7eB21b0dcF0B3E1654d184580fa98110E124f`, `$0.50` seed
+
+The clone factory currently contains 6 markets: 4 mirrors (Clippers, Tottenham, Fed decrease, and Fed increase) plus the 2 fast markets. The Israel/Iran mirror was skipped because its `createMarket` simulation consistently reverts even with a 3,000,000 gas cap. The remaining mirror creations cannot safely fit in the current native balance; pause further mirror broadcasts until the deployer is topped up by approximately `0.35 BOT` to leave a retry/operations buffer.
+
+The migration supports `MIGRATION_GAS_LIMIT` and `MIGRATION_EXCLUDE_QUESTIONS`. After the clone factory is deployed, the intended command is `npm run markets:migrate:testnet -- --live --limit 15 --seed-usdc 0.1` with the Brooklyn question excluded. Do not start the mainnet PM2 apps until the factory address is supplied to `YOLO_MAINNET_FACTORY_ADDRESS`. The isolated PM2 config is `scripts/vps/ecosystem.yolomarkets-mainnet.config.cjs`; its names are `yolomarkets-mainnet-web`, `yolomarkets-mainnet-fast-keeper`, and `yolomarkets-mainnet-polymarket-resolver`. A mainnet catalog indexer is intentionally not configured against the shared testnet database.
+
+## Minimal-proxy testnet experiment
+
+An isolated ERC-1167 clone implementation was deployed and exercised on Bohr testnet. The existing factories were not changed.
+
+- Current experimental clone factory: `0x898054039BC6D40763279340a5111D5C9a0A65e3`
+- Shared implementation: `0x45Faa1B1C0a4dCa2690cF31Ce1a120D5c01eCe9c`
+- Current test clone markets: `0x62eA1Ae3cc88a7769E1B806dac2e77bb67Ff6C36` and `0x0D5c4C8Ea05db411e14772053b16B562F0AA1042`
+- Previous experimental factory `0x5C09829Bf2894244c5C78f97cF6D2fd3628816fD` and its two test markets remain on testnet but are superseded.
+- Both were initialized with `0.1` test USDT and verified on-chain.
+- Clone creation used `483,186` and `466,086` gas versus approximately `3.9M` gas for the full-contract mainnet creation.
+- The fast-market keeper ran against the current clone factory, created BTC 1h and ETH 1h markets, completed its 2/2 live-set check, and ran the residual scan.
+- The web viem path approved, bought, and sold 10,000 shares on `0x1719dFB87abB5E977F03312fF943c54a50dB355D`; the market remains live with `tradeCount=2` and `totalLiquidity=100101` raw test USDT units.
+- A testnet-built Next.js market route rendered the live clone question with HTTP 200.
+
+The implementation and factory have unit coverage for initialization protection, deterministic addresses, trading, resolution, and role separation. The clone path has also passed live testnet keeper creation, web catalog/detail reads, and buy/sell smoke testing. Mainnet clone deployment has begun with one mirror and the two priority fast markets live. The isolated mainnet fast keeper is the only production service currently intended to run; the remaining mirror rollout and broader PM2 launch await funding.
+
 ## Current state
 
 The project is functional on Bohr/BOT testnet, not mainnet.
@@ -80,8 +130,11 @@ Treasury should be a multisig/cold wallet address, not another hot private key.
 ## Verification completed
 
 - `forge test`: 66 passed
+- Clone experiment: 9 dedicated tests; full Solidity suite now 75 passed
 - `npm run lint`: 0 errors; 3 pre-existing warnings
-- TypeScript has pre-existing Drizzle declaration errors. Changed market/UI files had no new targeted errors.
+- `npx tsc --noEmit`: passed
+- Mainnet production build: passed with the mainnet network configuration
+- Live clone factory and market reads: passed through the existing `listMarkets`, `getMarket`, and direct revenue-read paths
 - Protected factory was verified on-chain with four initial markets at 50% and constants:
   - `MIN_PRICE_YES = 2e16` (2%)
   - `MAX_PRICE_YES = 98e16` (98%)
@@ -104,8 +157,8 @@ Treasury should be a multisig/cold wallet address, not another hot private key.
 
 5. Deploy a fresh mainnet factory. Do not reuse any testnet factory address.
 6. Deploy with multisig admin and limited resolver role, or transfer admin immediately after bootstrap using the factory’s two-step admin transfer.
-7. Replace hardcoded `scan.bohr.life` links with the active network explorer.
-8. Verify/update the mainnet Multicall3 address; direct-read fallbacks should remain available.
+7. ~~Replace hardcoded `scan.bohr.life` links with the active network explorer.~~ Completed; UI links now use the active chain.
+8. ~~Verify/update the mainnet Multicall3 address; direct-read fallbacks should remain available.~~ Completed; mainnet uses BOT's deployed Multicall3 and Bohr revenue reads now have a direct-read fallback.
 9. Fix/verify `polymarket-resolution-keeper.ts` for Bohr/mainnet reads. It currently uses `multicall` for market-row reads and was not started because it can execute settlement transactions.
 10. Initialize the Postgres catalog and run the indexer:
 

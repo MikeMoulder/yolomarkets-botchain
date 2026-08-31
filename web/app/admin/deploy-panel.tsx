@@ -11,6 +11,7 @@ import {
 } from "wagmi";
 import { erc20Abi, factoryAbi, ADDRESSES } from "@/lib/contracts";
 import { arcTestnet } from "@/lib/chain";
+import { EXPLORER_URL } from "@/lib/explorer";
 import {
     formatCents,
     formatCompactUsd,
@@ -435,7 +436,7 @@ function DeployForm({
                 <div className="text-[11px] num text-text-mute tabular border-t border-border pt-3">
                     tx:{" "}
                     <a
-                        href={`https://scan.bohr.life/tx/${createTxHash}`}
+                                        href={`${EXPLORER_URL}/tx/${createTxHash}`}
                         target="_blank"
                         rel="noreferrer"
                         className="text-accent hover:underline"

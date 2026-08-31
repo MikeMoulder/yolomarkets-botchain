@@ -47,7 +47,9 @@ import {
 import { cancelOpenDrafts, getOpenDraft, isTextInputStep } from "./telegram-drafts";
 import { isAllowedImageMime, mimeFromPath, MAX_IMAGE_BYTES } from "./market-images";
 
-const EXPLORER = "https://testnet.arcscan.app";
+import { EXPLORER_URL } from "./explorer";
+
+const EXPLORER = EXPLORER_URL;
 
 /** Registered with `setMyCommands` so they show up in Telegram's "/" menu. */
 export const BOT_COMMANDS: BotCommand[] = [

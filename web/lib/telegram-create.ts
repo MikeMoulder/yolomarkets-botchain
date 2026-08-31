@@ -39,7 +39,9 @@ import {
 import { deployMarket, preflightCreate, type CreatePreflight } from "./list-market";
 import { formatBytes, putMarketImage } from "./market-images";
 
-const EXPLORER = "https://testnet.arcscan.app";
+import { EXPLORER_URL } from "./explorer";
+
+const EXPLORER = EXPLORER_URL;
 
 /** Callback prefixes owned by this flow. Kept two chars so they never collide
  *  with the Polymarket listing buttons (`L:`, `S:`, `X`). */

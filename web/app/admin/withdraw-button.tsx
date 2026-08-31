@@ -12,6 +12,7 @@ import {
 import { type Address } from "viem";
 import { arcTestnet } from "@/lib/chain";
 import { ADDRESSES, factoryAbi } from "@/lib/contracts";
+import { EXPLORER_URL } from "@/lib/explorer";
 
 type Props = {
     market: Address;
@@ -86,7 +87,7 @@ export function WithdrawButton({ market, recipient, withdrawable, legacy = false
             </button>
             {hash && (
                 <a
-                    href={`https://scan.bohr.life/tx/${hash}`}
+                    href={`${EXPLORER_URL}/tx/${hash}`}
                     target="_blank"
                     rel="noreferrer"
                     className="text-[10px] num text-text-faint hover:text-text-dim"

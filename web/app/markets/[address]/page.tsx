@@ -4,6 +4,7 @@ import Link from "next/link";
 import { isAddress, type Address } from "viem";
 import { getMarket, getMarketRevenue } from "@/lib/markets";
 import { ADDRESSES } from "@/lib/contracts";
+import { EXPLORER_URL } from "@/lib/explorer";
 import { BetTicket } from "@/components/bet-ticket";
 import { PaidEstimatePanel } from "@/components/paid-estimate-panel";
 import { lookupNativeImage } from "@/lib/native-image-overlay";
@@ -105,7 +106,7 @@ export default async function MarketPage({
                 </span>
                 <span className="text-text-faint">·</span>
                 <a
-                    href={`https://scan.bohr.life/address/${m.address}`}
+                    href={`${EXPLORER_URL}/address/${m.address}`}
                     target="_blank"
                     rel="noreferrer"
                     className="num normal-case tracking-normal text-text-dim hover:text-text transition-colors"
@@ -193,7 +194,7 @@ export default async function MarketPage({
                                 k="contract"
                                 v={
                                     <a
-                                        href={`https://scan.bohr.life/address/${m.address}`}
+                                        href={`${EXPLORER_URL}/address/${m.address}`}
                                         target="_blank"
                                         rel="noreferrer"
                                         className="hover:text-text"
@@ -206,7 +207,7 @@ export default async function MarketPage({
                                 k="settlement"
                                 v={
                                     <a
-                                        href={`https://scan.bohr.life/address/${ADDRESSES.usdc}`}
+                                        href={`${EXPLORER_URL}/address/${ADDRESSES.usdc}`}
                                         target="_blank"
                                         rel="noreferrer"
                                         className="hover:text-text"

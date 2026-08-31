@@ -12,6 +12,7 @@ import { usePathname } from "next/navigation";
 import { useWriteContract, usePublicClient } from "wagmi";
 import { useActiveWallet } from "@/lib/use-active-wallet";
 import { ADDRESSES, erc20Abi, marketAbi } from "@/lib/contracts";
+import { EXPLORER_URL } from "@/lib/explorer";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -407,7 +408,7 @@ export function AgentChat() {
                                 <div className="text-[12.5px] text-yes num">
                                     ✓ Confirmed ·{" "}
                                     <a
-                                        href={`https://scan.bohr.life/tx/${tx.hash}`}
+                                        href={`${EXPLORER_URL}/tx/${tx.hash}`}
                                         target="_blank"
                                         rel="noreferrer"
                                         className="text-accent hover:text-text break-all"

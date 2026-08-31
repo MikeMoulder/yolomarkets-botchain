@@ -10,6 +10,7 @@ import { AgentProfileBanner } from "@/components/agent-profile-banner";
 import { AgentTierPanel } from "@/components/agent-tier-panel";
 import { AgentScopeRedirect } from "@/components/agent-scope-redirect";
 import { getProfile } from "@/lib/agent-profiles";
+import { EXPLORER_URL } from "@/lib/explorer";
 
 export const metadata = { title: "Agent" };
 
@@ -348,7 +349,7 @@ function DecisionCard({
                                         k="tx"
                                         v={
                                             <a
-                                                href={`https://scan.bohr.life/tx/${d.tx_hash}`}
+                                                href={`${EXPLORER_URL}/tx/${d.tx_hash}`}
                                                 target="_blank"
                                                 rel="noreferrer"
                                                 className="num text-accent hover:text-text transition-colors break-all text-[11px]"

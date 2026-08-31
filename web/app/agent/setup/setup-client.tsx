@@ -19,6 +19,7 @@ import { formatUsdc, shortAddr } from "@/lib/format";
 import { PATTERN_LIST, type PatternId, PATTERNS } from "@/lib/agent-patterns";
 import { signProfileOp } from "@/lib/client-auth";
 import { BridgeUsdc } from "@/components/bridge-usdc";
+import { EXPLORER_URL } from "@/lib/explorer";
 
 type Category = { label: string; count: number };
 type NativeMarketLite = {
@@ -943,7 +944,7 @@ function Step7Fund({
                     <span className="num text-text-dim tabular break-all">
                         {agentAddress ? (
                             <a
-                                href={`https://testnet.arcscan.app/address/${agentAddress}`}
+                                href={`${EXPLORER_URL}/address/${agentAddress}`}
                                 target="_blank"
                                 rel="noreferrer"
                                 className="hover:text-text transition-colors"
@@ -1124,7 +1125,7 @@ function Step8Review({
                 <dd className="num text-text-dim tabular break-all text-[11.5px]">
                     {agentAddress ? (
                         <a
-                            href={`https://testnet.arcscan.app/address/${agentAddress}`}
+                            href={`${EXPLORER_URL}/address/${agentAddress}`}
                             target="_blank"
                             rel="noreferrer"
                             className="hover:text-text transition-colors"

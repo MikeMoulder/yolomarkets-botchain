@@ -16,6 +16,8 @@
     "markets:fast:wallets": "tsx scripts/generate-fast-market-wallets.ts",
     "markets:fast:swarm": "tsx scripts/fast-market-swarm.ts",
     "markets:poly:wrap": "tsx scripts/polymarket-wrap.ts",
+    "markets:migrate:testnet": "tsx scripts/migrate-testnet-markets.ts",
+    "markets:smoke:clone": "tsx scripts/smoke-clone-market.ts",
     "markets:poly:resolver": "tsx scripts/polymarket-resolution-keeper.ts",
     "markets:tg:suggest": "tsx scripts/telegram-suggest.ts",
     "telegram:bot": "tsx scripts/telegram-bot.ts",

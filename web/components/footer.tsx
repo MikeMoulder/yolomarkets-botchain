@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Logo } from "./logo";
+import { EXPLORER_URL } from "@/lib/explorer";
 
 const PRODUCT = [
     { href: "/", label: "Markets" },
@@ -9,9 +10,9 @@ const PRODUCT = [
 ];
 
 const RESOURCES = [
-    { href: "https://scan.bohr.life", label: "Bohr Explorer", external: true },
-    { href: "https://faucet.bohr.life/basic/", label: "tBOT Faucet", external: true },
-    { href: "https://rpc.bohr.life", label: "Bohr RPC", external: true },
+    { href: EXPLORER_URL, label: "BOT Explorer", external: true },
+    { href: "https://bridge.botchain.ai", label: "BOT Bridge", external: true },
+    { href: "https://rpc.botchain.ai", label: "BOT RPC", external: true },
 ];
 
 const LEGAL = [

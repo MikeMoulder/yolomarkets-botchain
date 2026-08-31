@@ -15,6 +15,7 @@ import { formatCents, formatProb, formatUsdc, priceToProb } from "@/lib/format";
 import { lmsrBuyCost, lmsrPriceYes, lmsrSellProceeds } from "@/lib/lmsr";
 import { useActiveWallet } from "@/lib/use-active-wallet";
 import { useWalletModal } from "@/components/wallet-modal";
+import { EXPLORER_URL } from "@/lib/explorer";
 
 const SLIPPAGE_BPS = 200; // 2%
 const MIN_PRICE = 0.02;
@@ -523,7 +524,7 @@ export function BetTicket({
                                 <div className="font-medium">{successMessage}</div>
                                 <a
                                     className="num mt-0.5 inline-block text-[11px] underline-offset-2 hover:underline"
-                                    href={`https://scan.bohr.life/tx/${successTxHash}`}
+                                    href={`${EXPLORER_URL}/tx/${successTxHash}`}
                                     target="_blank"
                                     rel="noreferrer"
                                 >
@@ -841,7 +842,7 @@ export function BetTicket({
                             <div className="font-medium">{successMessage}</div>
                             <a
                                 className="num mt-0.5 inline-block text-[11px] underline-offset-2 hover:underline"
-                                href={`https://scan.bohr.life/tx/${successTxHash}`}
+                                    href={`${EXPLORER_URL}/tx/${successTxHash}`}
                                 target="_blank"
                                 rel="noreferrer"
                             >

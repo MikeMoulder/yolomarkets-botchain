@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAccount, useSignMessage } from "wagmi";
 import { signProfileOp } from "@/lib/client-auth";
+import { EXPLORER_URL } from "@/lib/explorer";
 
 export type SerializablePosition = {
     market: string;
@@ -12,7 +13,7 @@ export type SerializablePosition = {
     exitProceeds: string; // micro
 };
 
-const EXPLORER_TX = "https://scan.bohr.life/tx/";
+const EXPLORER_TX = `${EXPLORER_URL}/tx/`;
 
 function fmtUsd(micro: bigint): string {
     return `$${(Number(micro) / 1e6).toFixed(2)}`;

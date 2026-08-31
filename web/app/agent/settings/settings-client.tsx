@@ -8,6 +8,7 @@ import { useAccount, useSignMessage } from "wagmi";
 import type { AgentProfile } from "@/lib/agent-profiles";
 import { PATTERNS } from "@/lib/agent-patterns";
 import { signProfileOp } from "@/lib/client-auth";
+import { EXPLORER_URL } from "@/lib/explorer";
 
 function signalLabel(signal: string): string {
     if (signal === "polymarket") return "crowd price";
@@ -350,7 +351,7 @@ function CircleAgentWalletCard({
                     address
                 </span>
                 <a
-                    href={`https://scan.bohr.life/address/${agentAddress}`}
+                    href={`${EXPLORER_URL}/address/${agentAddress}`}
                     target="_blank"
                     rel="noreferrer"
                     className="num text-text-dim tabular break-all hover:text-text"

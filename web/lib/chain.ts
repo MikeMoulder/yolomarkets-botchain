@@ -16,7 +16,9 @@ export const botChain = defineChain({
     },
     contracts: {
         multicall3: {
-            address: "0xcA11bde05977b3631167028862bE2a173976CA11",
+            // BOT Chain's deployed Multicall3 address (not the usual
+            // deterministic cA11 address used by many EVM chains).
+            address: "0x47FA21f684bBAD707A53a0f9BE59F1422F46C265",
         },
     },
 });

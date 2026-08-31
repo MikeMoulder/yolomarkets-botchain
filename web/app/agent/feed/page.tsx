@@ -12,6 +12,7 @@ import {
 } from "@/components/agent-positions-panel";
 import { AgentProfileBanner } from "@/components/agent-profile-banner";
 import { AgentScopeRedirect } from "@/components/agent-scope-redirect";
+import { EXPLORER_URL } from "@/lib/explorer";
 
 export const metadata = { title: "Agent Feed" };
 export const dynamic = "force-dynamic";
@@ -301,7 +302,7 @@ function TradeCard({
                                         k="tx"
                                         v={
                                             <a
-                                                href={`https://scan.bohr.life/tx/${d.tx_hash}`}
+                                                href={`${EXPLORER_URL}/tx/${d.tx_hash}`}
                                                 target="_blank"
                                                 rel="noreferrer"
                                                 className="num text-accent hover:text-text transition-colors break-all text-[11px]"

@@ -515,6 +515,38 @@ export async function getMarket(address: Address): Promise<MarketDetail | null> 
 
 export async function getMarketRevenue(address: Address): Promise<MarketRevenue> {
     try {
+        if (!supportsMulticall) {
+            const [protocolFeeBps, accruedFees, reserveRequired, treasuryWithdrawable] =
+                await Promise.all([
+                    publicClient.readContract({
+                        address,
+                        abi: marketAbi,
+                        functionName: "protocolFeeBps",
+                    }) as Promise<number>,
+                    publicClient.readContract({
+                        address,
+                        abi: marketAbi,
+                        functionName: "accruedFees",
+                    }) as Promise<bigint>,
+                    publicClient.readContract({
+                        address,
+                        abi: marketAbi,
+                        functionName: "reserveRequired",
+                    }) as Promise<bigint>,
+                    publicClient.readContract({
+                        address,
+                        abi: marketAbi,
+                        functionName: "treasuryWithdrawable",
+                    }) as Promise<bigint>,
+                ]);
+            return {
+                protocolFeeBps: Number(protocolFeeBps),
+                accruedFees,
+                reserveRequired,
+                treasuryWithdrawable,
+            };
+        }
+
         const r = await publicClient.multicall({
             allowFailure: true,
             contracts: [
