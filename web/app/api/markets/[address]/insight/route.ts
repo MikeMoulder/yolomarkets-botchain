@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import {
     type Address,
     isAddress,
+    parseUnits,
     type Hash,
 } from "viem";
 import { estimate, isEstimateProviderConfigured } from "@/lib/llm";
@@ -12,7 +13,8 @@ import { priceToProb } from "@/lib/format";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const INSIGHT_FEE_MICRO = 50_000n; // 0.05 USDT with 6 decimals
+const INSIGHT_FEE_USDT = process.env.AI_INSIGHT_FEE_USDT?.trim() || "0.2";
+const INSIGHT_FEE_MICRO = parseUnits(INSIGHT_FEE_USDT, 6);
 const ERC20_TRANSFER_TOPIC =
     "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
 const ERC20_TRANSFER_SELECTOR = "0xa9059cbb";
@@ -294,7 +296,7 @@ export async function POST(
 
     if (!hasValidPayment) {
         return NextResponse.json(
-            { error: "missing 0.05 USDT payment transfer in tx" },
+            { error: `missing ${INSIGHT_FEE_USDT} USDT payment transfer in tx` },
             { status: 402 },
         );
     }

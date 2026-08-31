@@ -53,6 +53,8 @@ An isolated ERC-1167 clone implementation was deployed and exercised on Bohr tes
 
 The implementation and factory have unit coverage for initialization protection, deterministic addresses, trading, resolution, and role separation. The clone path has also passed live testnet keeper creation, web catalog/detail reads, and buy/sell smoke testing. Mainnet clone deployment has begun with one mirror and the two priority fast markets live. The isolated mainnet fast keeper is the only production service currently intended to run; the remaining mirror rollout and broader PM2 launch await funding.
 
+Local web development is now configured for the mainnet clone factory in `web/.env.local` (chain `677`, mainnet token, legacy catalog disabled). Vercel has not been changed. A non-secret deployment template is available at `web/vercel-mainnet.env.example`; set its values in the Vercel project before a mainnet redeploy. The on-demand wallet insight fee is configured as `0.2 USDT` per query in both client and server paths.
+
 ## Current state
 
 The project is functional on Bohr/BOT testnet, not mainnet.

@@ -45,12 +45,6 @@ export function Footer() {
                             An autonomous agent reads the news, sizes by Kelly,
                             and trades on your behalf.
                         </p>
-                        <div className="flex items-center gap-2 mt-1">
-                            <span className="inline-flex items-center gap-1.5 text-[10.5px] uppercase tracking-[0.18em] text-yes num">
-                                <span className="w-1.5 h-1.5 rounded-full bg-yes live-dot" />
-                                live · testnet
-                            </span>
-                        </div>
                     </div>
 
                     {/* Product */}

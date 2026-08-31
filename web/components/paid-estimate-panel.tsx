@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { type Address, isAddress } from "viem";
+import { type Address, isAddress, parseUnits } from "viem";
 import {
     useSwitchChain,
     useWaitForTransactionReceipt,
@@ -14,8 +14,8 @@ import { useActiveWallet } from "@/lib/use-active-wallet";
 import { useWalletModal } from "@/components/wallet-modal";
 import type { Estimate } from "@/lib/llm";
 
-const INSIGHT_FEE_USDT = "0.05";
-const INSIGHT_FEE_MICRO = 50_000n; // 0.05 USDT with 6 decimals
+const INSIGHT_FEE_USDT = process.env.NEXT_PUBLIC_AI_INSIGHT_FEE_USDT?.trim() || "0.2";
+const INSIGHT_FEE_MICRO = parseUnits(INSIGHT_FEE_USDT, 6);
 
 const insightRecipientRaw = process.env.NEXT_PUBLIC_AI_INSIGHT_FEE_RECIPIENT;
 const insightRecipient: Address | undefined =

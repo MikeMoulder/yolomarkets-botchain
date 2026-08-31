@@ -13,7 +13,6 @@ import { CategoryChips } from "@/components/category-chips";
 import { SearchInput } from "@/components/search-input";
 import { SortSelect } from "@/components/sort-select";
 import { ExpiryFilter, type ExpiryValue } from "@/components/expiry-filter";
-import { formatUsdc } from "@/lib/format";
 import { withDeadline, SSR_DEADLINE_MS, SSR_CRITICAL_DEADLINE_MS } from "@/lib/with-deadline";
 
 // `searchParams` makes this route dynamic. Native markets are read on-chain
@@ -90,10 +89,6 @@ export default async function HomePage({
         .sort(([a], [b]) => categoryRank(a) - categoryRank(b) || a.localeCompare(b))
         .map(([label, count]) => ({ label, count }));
 
-    // Aggregate stats (over the full active set so the header doesn't jitter).
-    const totalLiq = activeNativeMarkets.reduce((s, m) => s + m.totalLiquidity, 0n);
-    const categoryCount = new Set(activeNativeMarkets.map((m) => m.category.trim())).size;
-
     // Movers — respects the category filter, ignores free-text search.
     const moversNative = cat
         ? activeNativeMarkets.filter((m) => m.category.trim() === cat)
@@ -109,29 +104,6 @@ export default async function HomePage({
 
     return (
         <div>
-            {/* Status strip — tradeable-focused, backed by an ambient gradient. */}
-            <section className="relative border-b border-border overflow-hidden noise-overlay">
-                <div className="mesh-ambient" aria-hidden />
-                <div className="absolute inset-0 grid-underlay opacity-40" aria-hidden />
-                <div className="relative mx-auto max-w-[1440px] px-6 py-6 md:py-10">
-                    <div className="flex items-end gap-x-8 overflow-x-auto no-scrollbar -mx-6 px-6 md:mx-0 md:px-0 md:flex-wrap md:gap-x-10 md:gap-y-5 md:overflow-visible divide-x divide-border/60">
-                        <Stat
-                            label="tradeable on BOT Chain"
-                            value={activeNativeMarkets.length.toString()}
-                            unit="live markets"
-                        />
-                        <Stat
-                            label="liquidity"
-                            value={`$${formatUsdc(totalLiq)}`}
-                            unit="across markets"
-                        />
-                        <Stat label="categories" value={categoryCount.toString()} unit="tracked" />
-                        <Stat label="settlement" value="USDT" unit="Bohr testnet" />
-                        <Stat label="latency" value="sub-second" unit="finality" />
-                    </div>
-                </div>
-            </section>
-
             {/* Filter bar (sticky) */}
             <section className="sticky top-0 z-20 bg-bg-glass backdrop-blur-md">
                 <div className="mx-auto max-w-[1440px] px-6 py-3 flex items-center gap-3 flex-wrap">
@@ -242,32 +214,6 @@ function FilteredResults({
                 <MarketGrid key={filterKey} native={cards} events={[]} />
             )}
         </section>
-    );
-}
-
-function Stat({
-    label,
-    value,
-    unit,
-}: {
-    label: string;
-    value: string;
-    unit?: string;
-}) {
-    return (
-        <div className="flex flex-col min-w-0 shrink-0 pl-8 first:pl-0 md:pl-10">
-            <span className="text-[9.5px] uppercase tracking-[0.22em] text-text-mute mb-1.5">
-                {label}
-            </span>
-            <span className="num text-[17px] text-text tabular leading-none font-medium">
-                {value}
-                {unit && (
-                    <span className="text-text-faint text-[10.5px] ml-1.5 lowercase tracking-normal font-normal">
-                        {unit}
-                    </span>
-                )}
-            </span>
-        </div>
     );
 }
 
